@@ -4,11 +4,13 @@ import numpy as np
 
 class ClasificadorColor:
     """
-    Decide si un contorno es PARE (rojo) o ADELANTE (verde)
-    usando K-Means sobre los píxeles interiores del contorno
-    en el espacio HSV (diapositivas 4 y 5 del PDF).
-    K-Means extrae los centroides de color dominante,
-    separando el color del fondo del texto blanco o reflejos.
+    Decide de qué color es el interior de un contorno, usando
+    K-Means sobre los píxeles que quedan dentro de él.
+
+    K-Means (en su modalidad básica) se usa solo para esta
+    decisión puntual: separar el color de fondo del octágono
+    del blanco de las letras "PARE"/"SIGA". La FORMA la
+    analiza DetectorSenales.
     """
 
     def __init__(self, minimo_pixeles=30):
@@ -48,29 +50,13 @@ class ClasificadorColor:
         indice_dominante = np.argmax(conteos)
         return centros[indice_dominante]
 
-    def clasificar(self, frame_bgr, contorno_aproximado):
-        """
-        Devuelve ("PARE" | "ADELANTE" | "DESCONOCIDO", (h, s, v))
-        o (None, None) si no hay suficientes píxeles.
-        """
-        mascara = self._mascara_del_contorno(frame_bgr.shape[:2], contorno_aproximado)
-        pixeles_hsv = self._pixeles_hsv_dentro(frame_bgr, mascara)
-
-        if len(pixeles_hsv) < self.minimo_pixeles:
-            return None, None
-
-        h, s, v = self._color_dominante_hsv(pixeles_hsv)
-
-        # Si la saturación del cluster dominante es muy baja, es blanco, gris o negro
-        if s < 40 or v < 30:
-            return "DESCONOCIDO", (h, s, v)
-
-        # En OpenCV HSV (H de 0 a 179):
-        # Rojo: extremos 0-15 y 165-179
-        # Verde: 35 a 90
-        if h <= 15 or h >= 165:
-            return "PARE", (h, s, v)
-        elif 35 <= h <= 90:
-            return "ADELANTE", (h, s, v)
-
-        return "DESCONOCIDO", (h, s, v)
+    def _nombre_por_matiz(self, h, s):
+        # En OpenCV, H va de 0 a 179. El rojo queda cerca de los
+        # extremos (0 o 179); el verde en el medio (40-85 aprox).
+        # Exigimos saturación alta para no confundir blanco/gris
+        # (que tienen S baja) con un color real.
+        if (h <= 10 or h >= 170) and s > 80:
+            return "PARE"
+        elif 40 <= h <= 85 and s > 80:
+            return "SIGA"
+        return "DESCONOCIDO"
