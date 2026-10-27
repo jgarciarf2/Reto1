@@ -193,3 +193,10 @@ pip-selfcheck.json
 dataset/
 *.keras
 entrenamiento.log
+
+# Pesados de 5_cnns: fotos, copias HEIC, entornos y modelos entrenados
+5_cnns/dataset/
+5_cnns/Copia de dataset/
+5_cnns/.venv/
+5_cnns/resultados/
+5_cnns/__pycache__/
