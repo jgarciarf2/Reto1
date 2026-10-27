@@ -18,7 +18,8 @@ class SalidaConsola:
     """Canal de prueba: imprime la letra en vez de enviarla."""
 
     def escribir(self, texto, accion):
-        print(f"[robot] {accion:<9} -> {texto!r}")
+        # print(f"[robot] {accion:<9} -> {texto!r}")
+        pass
 
     def cerrar(self):
         pass
@@ -62,7 +63,7 @@ class SalidaBluetooth:
             # Eliminar posibles terminadores para enviar el comando limpio
             comando = texto.strip()
             self.robot._enviar(comando)
-        print(f"[robot] {accion:<9} -> {texto!r}")
+        # print(f"[robot] {accion:<9} -> {texto!r}")
 
     def cerrar(self):
         if self.robot is not None:

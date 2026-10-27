@@ -11,7 +11,7 @@ trainer = CNNTrainer(
     dataset_dir="5_cnns/dataset",  # 0=PARE, 1=SIGA, 2=VELOCIDAD_60, 3=ZONA_ESCOLAR
     output_dir="resultados",
     experimento=nombre_exp,
-    max_epochs=10,
+    max_epochs=30,
     patience=5,
     batch_size=32,
     learning_rate=1e-3,

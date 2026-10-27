@@ -1,0 +1,16 @@
+Experimento: reto2_exp2
+Modelo: MobileNet
+Épocas totales entrenadas: 30
+Mejor época seleccionada: 26
+============================================================
+
+              precision    recall  f1-score   support
+
+           0     1.0000    1.0000    1.0000         2
+           1     1.0000    1.0000    1.0000         2
+           2     0.7500    1.0000    0.8571         3
+           3     1.0000    0.6667    0.8000         3
+
+    accuracy                         0.9000        10
+   macro avg     0.9375    0.9167    0.9143        10
+weighted avg     0.9250    0.9000    0.8971        10
