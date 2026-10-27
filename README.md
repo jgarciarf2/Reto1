@@ -106,6 +106,76 @@ Frenar es más exigente que seguir frenado. Para entrar a DETENIDO hace falta un
 - Si el profesor pone la tarjeta muy cerca de la cámara o pegada al borde de la imagen, la forma no se puede confirmar y el robot no frena hasta que la tarjeta quede entera a la vista.
 - Las letras y el puerto del robot todavía son provisionales.
 
+## Reto 2: cuatro señales con CNN
+
+En el reto 2 las señales (PARE, SIGA, ZONA ESCOLAR y VELOCIDAD 60) se reconocen con las CNN de clase (transfer learning sobre ImageNet). El seguimiento de línea sigue siendo el del reto 1, que el enunciado permite conservar.
+
+### Cómo correrlo
+
+TensorFlow todavía no soporta Python 3.14, así que se usa un entorno con 3.13:
+
+```bash
+py -3.13 -m venv .venv
+.venv\Scripts\activate
+pip install -r requirements.txt
+
+python entrenar.py reto2_exp1          # entrena y compara las 5 CNN
+python probar_videos.py                # prueba el modelo elegido sobre el video de la pista
+python -m unittest test_control_cnn    # pruebas de la lógica de control
+python main.py 2                       # robot con la cámara 2
+```
+
+### Dataset
+
+Las fotos están en `5_cnns/dataset/<clase>/`. **Ojo con el orden**: en nuestras fotos la carpeta 2 es la de 60 km/h y la 3 la de zona escolar, al revés de la guía. El orden está en `modelos_cnn.CLASES`:
+
+| Carpeta | Señal | Fotos |
+| ------- | ----- | ----- |
+| 0 | PARE | 77 |
+| 1 | SIGA | 90 |
+| 2 | VELOCIDAD_60 | 55 |
+| 3 | ZONA_ESCOLAR | 75 |
+
+**Particiones sin fotos gemelas.** Las fotos se tomaron en ráfagas y muchas son casi iguales. Si una cae en train y su gemela en test, el test mide memoria y no generalización. Por eso `entrenador_cnn.agrupar_casi_identicas` junta en un grupo las fotos de la misma clase que tienen un dHash parecido (≤ 10 de 64 bits distintos) o que se tomaron en el mismo segundo según el nombre del archivo. La división train/val/test (≈ 62/21/17 %) se hace con `StratifiedGroupKFold`, así que cada grupo queda entero en una sola partición. Las 297 fotos forman 140 grupos. Todos los modelos usan las mismas particiones (`resultados/<exp>/particiones.csv`).
+
+**Aumentos de datos (solo en train).** En las fotos la señal aparece girada en cualquier ángulo, así que se rota en todo el círculo. También hay zoom, desplazamiento, brillo y contraste. No hay flip porque invertiría el texto.
+
+### Resultados (`resultados/reto2_exp1/`)
+
+Las cinco CNN se entrenan con la base congelada, Global Average Pooling, Dropout 0.3 y Softmax, y early stopping sobre `val_loss`. Los dos mejores se eligen por `val_loss` (validación, nunca test):
+
+| Modelo | val_loss | Accuracy test | F1 macro | ms / foto (CPU) |
+| ------ | -------- | ------------- | -------- | --------------- |
+| **MobileNet** | **0.098** | **0.961** | **0.954** | **66** |
+| ResNet50 | 0.186 | 0.824 | 0.840 | 185 |
+| VGG16 | 0.381 | 0.765 | 0.742 | 136 |
+| DenseNet121 | 0.378 | 0.765 | 0.774 | 318 |
+| VGG19 | 0.474 | 0.451 | 0.474 | 164 |
+
+Por cada modelo hay curva de pérdida, matriz de confusión y reporte por clase. `tabla_mejores.csv` tiene la tabla comparativa de los dos mejores, por clase y con el promedio macro.
+
+**Se integra MobileNet.** Es la mejor en validación y en test, y también la más rápida: unas 15 predicciones por segundo en CPU, contra unas 5 de ResNet50. ResNet50 confunde sobre todo ZONA ESCOLAR y 60 con SIGA (la precisión de SIGA cae a 0.57). MobileNet solo falla una foto de 60 y una de zona escolar.
+
+### Control del robot (`control_cnn.py`)
+
+| Señal | Comportamiento |
+| ----- | -------------- |
+| PARE | Se detiene y sigue detenido **hasta ver SIGA** |
+| SIGA | Arranca si estaba detenido; si no, sigue igual |
+| ZONA ESCOLAR | Velocidad REDUCIDA; no lo saca de un PARE |
+| VELOCIDAD 60 | Velocidad NORMAL; no lo saca de un PARE |
+
+`detenido` (lo cambian PARE y SIGA) y `velocidad` (lo cambian ZONA y 60) son independientes. Si el robot ve la zona escolar mientras está detenido, sigue quieto, y cuando ve SIGA arranca despacio.
+
+**Velocidad reducida por pulsos.** El mBot solo tiene "adelante" y "parar". En velocidad reducida, en cada ciclo de 1 s avanza 0.35 s y queda quieto el resto (`config_robot.VELOCIDADES`). Los giros no se pulsan, para no perder la línea.
+
+**Pista sin señal.** La CNN siempre responde una de las cuatro clases. Con la pista vacía tiende a decir SIGA con 40-80 % de confianza. Para que eso no saque al robot de un PARE:
+- se promedian las últimas 2 predicciones (`VENTANA_CNN`);
+- cada señal tiene su propio umbral (`CONFIANZA_MINIMA`): PARE y SIGA 0.90, porque un error con ellas es caro, y ZONA 0.60 y 60 0.75, porque un error solo cambia la velocidad;
+- la señal se obedece tras 3 predicciones seguidas (`CONFIRMACIONES_CNN`). La CNN se consulta cada 0.2 s, así que reaccionar a una señal toma unos 0.6-0.8 s.
+
+Los umbrales se ajustaron con `probar_videos.py` sobre el video `5_cnns/dataset/WhatsApp Video ... 11.26.30 AM.mp4`, que no se usó para entrenar. En ese video MobileNet obedece 60 → SIGA → 60 → PARE → ZONA → ZONA → SIGA sin ninguna señal falsa en los tramos vacíos. Solo pierde un SIGA (s 36-39), y el robot sigue detenido hasta el SIGA siguiente. Como los umbrales se eligieron con este mismo video, el resultado es optimista. Lo ideal es validarlo con otra grabación.
+
 ## Comparación con otros equipos
 
 _Pendiente: completar después de la socialización en clase._

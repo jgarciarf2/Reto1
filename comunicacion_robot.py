@@ -85,8 +85,9 @@ class ComunicacionRobot:
         self.ultima_accion = None
         self.ultimo_tiempo_envio = 0
         self.intervalo = getattr(config_robot, "INTERVALO_REFRESCO_S", 0.3)
-        # Cada cuánto se repite ADELANTE; la CNN lo cambia según la señal.
-        self.intervalo_adelante = self.intervalo
+        # Velocidad de marcha (config_robot.VELOCIDADES); la CNN la cambia según la señal.
+        self.velocidad = "NORMAL"
+        self._inicio_ciclo = time.time()
 
     def _crear_salida(self):
         if getattr(config_robot, "MAC_BLUETOOTH", None):
@@ -100,9 +101,9 @@ class ComunicacionRobot:
 
     def enviar(self, accion):
         ahora = time.time()
+        accion = self._aplicar_velocidad(accion, ahora)
         # Enviar inmediatamente si cambió la acción, o periódicamente si sigue siendo la misma
-        intervalo = self.intervalo_adelante if accion == Accion.ADELANTE else self.intervalo
-        debe_enviar = (accion != self.ultima_accion) or ((ahora - self.ultimo_tiempo_envio) >= intervalo)
+        debe_enviar = (accion != self.ultima_accion) or ((ahora - self.ultimo_tiempo_envio) >= self.intervalo)
 
         if not debe_enviar:
             return
@@ -111,6 +112,18 @@ class ComunicacionRobot:
         self.salida.escribir(texto, accion)
         self.ultima_accion = accion
         self.ultimo_tiempo_envio = ahora
+
+    def _aplicar_velocidad(self, accion, ahora):
+        """
+        A velocidad reducida, ADELANTE se convierte en pulsos: dentro de
+        cada ciclo avanza `avance_s` segundos y el resto del ciclo PARAR.
+        Los giros no se tocan para no perder la línea.
+        """
+        perfil = config_robot.VELOCIDADES[self.velocidad]
+        if accion != Accion.ADELANTE or not perfil["ciclo_s"]:
+            return accion
+        fase = (ahora - self._inicio_ciclo) % perfil["ciclo_s"]
+        return Accion.ADELANTE if fase < perfil["avance_s"] else Accion.PARAR
 
     def cerrar(self):
         # Antes de soltar la conexión se deja el robot quieto.

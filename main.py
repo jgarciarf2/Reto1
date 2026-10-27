@@ -159,14 +159,21 @@ class AplicacionDetector:
         return self.visualizador.crear_panel(salida, mascaras["total"])
 
     def _decidir_con_cnn(self, frame, accion_linea):
-        # La CNN es la parte pesada: se consulta ~4 veces por segundo, no en cada frame.
+        # La CNN es la parte pesada: se consulta cada INTERVALO_CNN_S, no en cada frame.
+        import config_robot
         ahora = time.time()
-        if ahora - self.ultima_prediccion >= 0.25:
+        if ahora - self.ultima_prediccion >= config_robot.INTERVALO_CNN_S:
             self.ultima_prediccion = ahora
-            clase, prob = self.predictor.predecir(frame)
-            self.control_cnn.actualizar(clase, prob, ahora)
+            probs = self.predictor.probabilidades(frame)
+            clase = max(probs, key=probs.get)
+            prob = probs[clase]
+            confirmada = self.control_cnn.actualizar(probs)
+            if confirmada:
+                print(f"[CNN] señal confirmada: {confirmada} -> "
+                      f"{'DETENIDO' if self.control_cnn.detenido else 'EN MARCHA'}, "
+                      f"velocidad {self.control_cnn.velocidad}")
             self.ultimo_texto_cnn = f"CNN: {clase} {prob * 100:.0f}%"
-        self.robot.intervalo_adelante = self.control_cnn.intervalo_adelante
+        self.robot.velocidad = self.control_cnn.velocidad
         if self.control_cnn.detenido:
             return Accion.PARAR
         return accion_linea
@@ -174,11 +181,14 @@ class AplicacionDetector:
     def _dibujar_estado(self, salida, accion):
         if self.predictor:
             estado = ControlSenales.DETENIDO if self.control_cnn.detenido else ControlSenales.SIGUIENDO
-            texto = getattr(self, "ultimo_texto_cnn", "CNN...")
-            cv2.putText(salida, texto, (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.8,
-                        (0, 0, 0), 4, cv2.LINE_AA)
-            cv2.putText(salida, texto, (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.8,
-                        (255, 255, 0), 2, cv2.LINE_AA)
+            lineas = [getattr(self, "ultimo_texto_cnn", "CNN..."),
+                      f"Vel: {self.control_cnn.velocidad}  Ultima: {self.control_cnn.ultima_senal or '-'}"]
+            for i, texto in enumerate(lineas):
+                y = 30 + 30 * i
+                cv2.putText(salida, texto, (10, y), cv2.FONT_HERSHEY_SIMPLEX, 0.8,
+                            (0, 0, 0), 4, cv2.LINE_AA)
+                cv2.putText(salida, texto, (10, y), cv2.FONT_HERSHEY_SIMPLEX, 0.8,
+                            (255, 255, 0), 2, cv2.LINE_AA)
         else:
             estado = self.control.estado
         texto = f"{estado} -> {accion}"

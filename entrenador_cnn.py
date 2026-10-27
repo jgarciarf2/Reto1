@@ -1,6 +1,8 @@
 import csv
 import json
 import os
+import re
+import time
 
 import keras
 from keras import layers, models
@@ -14,10 +16,64 @@ from sklearn.metrics import (
     confusion_matrix,
     f1_score,
 )
-from sklearn.model_selection import train_test_split
+from sklearn.model_selection import StratifiedGroupKFold
 import tensorflow as tf
+from PIL import Image
 
 from modelos_cnn import MODELOS
+
+
+def _dhash(ruta):
+    """Huella de 64 bits de la foto: compara el brillo de píxeles vecinos en una miniatura 9x8."""
+    img = Image.open(ruta)
+    img.draft("L", (160, 160))  # decodifica el JPEG ya reducido (mucho más rápido)
+    img = img.convert("L").resize((9, 8), Image.LANCZOS)
+    a = np.asarray(img, dtype=np.int16)
+    return (a[:, 1:] > a[:, :-1]).flatten()
+
+
+def _segundo_de_captura(nombre):
+    """Segundo del día en que se tomó la foto, leído del nombre del archivo (o None)."""
+    m = re.search(r"\d{8}_(\d{2})(\d{2})(\d{2})", nombre)  # 20261027_095759.jpg
+    if m:
+        h, mi, s = map(int, m.groups())
+        return h * 3600 + mi * 60 + s
+    m = re.search(r"at (\d+)\.(\d+)\.(\d+) (AM|PM)", nombre)  # WhatsApp Image ... at 9.43.44 AM
+    if m:
+        h, mi, s = map(int, m.groups()[:3])
+        h = h % 12 + (12 if m.group(4) == "PM" else 0)
+        return h * 3600 + mi * 60 + s
+    return None
+
+
+def agrupar_casi_identicas(file_paths, labels, umbral_hash=10):
+    """
+    Une en un mismo grupo las fotos de la misma clase que son casi iguales:
+    las que difieren en <= `umbral_hash` bits de su dHash, o las que se
+    tomaron en el mismo segundo (ráfaga). Devuelve el id de grupo de cada foto.
+    """
+    padre = list(range(len(file_paths)))
+
+    def raiz(i):
+        while padre[i] != i:
+            padre[i] = padre[padre[i]]
+            i = padre[i]
+        return i
+
+    hashes = np.array([_dhash(p) for p in file_paths])
+    segundos = [_segundo_de_captura(os.path.basename(p)) for p in file_paths]
+    for i in range(len(file_paths)):
+        for j in range(i + 1, len(file_paths)):
+            if labels[i] != labels[j]:
+                continue
+            parecidas = np.count_nonzero(hashes[i] != hashes[j]) <= umbral_hash
+            rafaga = segundos[i] is not None and segundos[i] == segundos[j]
+            if parecidas or rafaga:
+                padre[raiz(i)] = raiz(j)
+
+    raices = [raiz(i) for i in range(len(file_paths))]
+    ids = {r: k for k, r in enumerate(dict.fromkeys(raices))}
+    return np.array([ids[r] for r in raices])
 
 
 class CNNTrainer:
@@ -27,8 +83,10 @@ class CNNTrainer:
     def __init__(self, dataset_dir, img_size=(224, 224), batch_size=32,
                  val_split=0.2, test_split=0.1, patience=5, max_epochs=100,
                  learning_rate=1e-3, seed=42, output_dir="resultados",
-                 experimento="experimento_1"):
+                 experimento="experimento_1", nombres_clases=None, umbral_hash=10):
         self.dataset_dir = dataset_dir
+        self.nombres_clases = nombres_clases
+        self.umbral_hash = umbral_hash
         self.img_size = img_size
         self.batch_size = batch_size
         self.val_split = val_split
@@ -41,6 +99,7 @@ class CNNTrainer:
         self.experimento = experimento
         self.exp_dir = os.path.join(self.output_dir, self.experimento)
         self.historiales = {}
+        self.reportes = {}
         os.makedirs(self.exp_dir, exist_ok=True)
         self._cargar_datos()
 
@@ -73,34 +132,57 @@ class CNNTrainer:
         if not file_paths:
             raise ValueError(f"No se encontraron imágenes válidas en '{self.dataset_dir}'.")
 
-        self.class_names = class_names
+        self.carpetas = class_names
+        # Nombres legibles (PARE, SIGA, ...) para reportes y matrices
+        self.class_names = self.nombres_clases or class_names
         self.num_classes = len(self.class_names)
 
-        train_val_paths, test_paths, train_val_labels, test_labels = train_test_split(
-            file_paths,
-            labels,
-            test_size=self.test_split,
-            stratify=labels,
-            random_state=self.seed,
-        )
+        # Las fotos se tomaron en ráfagas: varias son casi iguales. Si una
+        # queda en train y su gemela en test, el test deja de medir algo
+        # real. Por eso se parte por grupos de fotos casi idénticas y cada
+        # grupo cae completo en una sola partición.
+        grupos = agrupar_casi_identicas(file_paths, labels, self.umbral_hash)
+        idx = np.arange(len(file_paths))
+        labels_np = np.array(labels)
+
+        n_test = max(2, round(1 / self.test_split))
+        sgkf = StratifiedGroupKFold(n_splits=n_test, shuffle=True, random_state=self.seed)
+        resto, test_idx = next(sgkf.split(idx, labels_np, grupos))
 
         val_rel = self.val_split / (1.0 - self.test_split)
-        train_paths, val_paths, train_labels, val_labels = train_test_split(
-            train_val_paths,
-            train_val_labels,
-            test_size=val_rel,
-            stratify=train_val_labels,
-            random_state=self.seed,
-        )
+        n_val = max(2, round(1 / val_rel))
+        sgkf = StratifiedGroupKFold(n_splits=n_val, shuffle=True, random_state=self.seed)
+        tr, va = next(sgkf.split(resto, labels_np[resto], grupos[resto]))
+        train_idx, val_idx = resto[tr], resto[va]
 
-        self.train_raw = self._crear_dataset(train_paths, train_labels, entrenar=True)
-        self.val_raw = self._crear_dataset(val_paths, val_labels)
-        self.test_raw = self._crear_dataset(test_paths, test_labels)
+        self._guardar_particiones(file_paths, labels, grupos,
+                                  {"train": train_idx, "val": val_idx, "test": test_idx})
+
+        def tomar(ids):
+            return [file_paths[i] for i in ids], [labels[i] for i in ids]
+
+        self.train_raw = self._crear_dataset(*tomar(train_idx), entrenar=True)
+        self.val_raw = self._crear_dataset(*tomar(val_idx))
+        self.test_raw = self._crear_dataset(*tomar(test_idx))
+
+    def _guardar_particiones(self, file_paths, labels, grupos, particiones):
+        """Deja en disco qué foto quedó en cada partición (las mismas para todos los modelos)."""
+        ruta = os.path.join(self.exp_dir, "particiones.csv")
+        with open(ruta, "w", newline="", encoding="utf-8") as f:
+            w = csv.writer(f)
+            w.writerow(["particion", "clase", "grupo", "archivo"])
+            for nombre, ids in particiones.items():
+                for i in ids:
+                    w.writerow([nombre, self.class_names[labels[i]], grupos[i], file_paths[i]])
+        print(f"Grupos de fotos casi idénticas: {len(set(grupos))} (de {len(file_paths)} fotos)")
+        for nombre, ids in particiones.items():
+            conteo = np.bincount([labels[i] for i in ids], minlength=self.num_classes)
+            detalle = ", ".join(f"{c}={n}" for c, n in zip(self.class_names, conteo))
+            print(f"  {nombre:<5} {len(ids):>3} fotos  ({detalle})")
+        print(f"Particiones guardadas en: {ruta}")
 
     def _crear_dataset(self, paths, labels, entrenar=False):
         path_ds = tf.data.Dataset.from_tensor_slices((list(paths), list(labels)))
-        if entrenar:
-            path_ds = path_ds.shuffle(len(paths), seed=self.seed, reshuffle_each_iteration=True)
 
         def _cargar(path, label):
             img = tf.io.read_file(path)
@@ -109,31 +191,48 @@ class CNNTrainer:
             img = tf.cast(img, tf.float32)
             return img, label
 
-        ds = path_ds.map(_cargar, num_parallel_calls=tf.data.AUTOTUNE)
-        return ds.batch(self.batch_size).cache().prefetch(tf.data.AUTOTUNE)
+        # Las fotos originales pesan mucho: se decodifican una sola vez y se
+        # guardan ya reducidas a img_size.
+        ds = path_ds.map(_cargar, num_parallel_calls=tf.data.AUTOTUNE).cache()
+        if entrenar:
+            self._n_train = len(paths)
+        return ds
 
     def _preparar(self, ds, preprocess, entrenar=False):
+        if entrenar:
+            ds = ds.shuffle(self._n_train, seed=self.seed, reshuffle_each_iteration=True)
+        ds = ds.batch(self.batch_size)
+        if entrenar:
+            aumentos = self._aumentos()
+            ds = ds.map(lambda x, y: (aumentos(x, training=True), y),
+                        num_parallel_calls=tf.data.AUTOTUNE)
         ds = ds.map(lambda x, y: (preprocess(tf.cast(x, tf.float32)), y),
                     num_parallel_calls=tf.data.AUTOTUNE)
-        if entrenar:
-            ds = ds.shuffle(1000, seed=self.seed)
         return ds.prefetch(tf.data.AUTOTUNE)
+
+    def _aumentos(self):
+        """
+        Variaciones aleatorias sobre los píxeles originales (0-255), solo al
+        entrenar. En las fotos la señal aparece girada en cualquier ángulo
+        (incluso al revés), así que se rota en todo el círculo. Brillo y
+        contraste simulan la luz cambiante de la pista. No hay flip: invertiría
+        el texto de PARE / SIGA y el "60".
+        """
+        return keras.Sequential([
+            layers.RandomRotation(0.5, fill_mode="reflect", seed=self.seed),
+            layers.RandomZoom((-0.2, 0.25), fill_mode="reflect", seed=self.seed),
+            layers.RandomTranslation(0.1, 0.1, fill_mode="reflect", seed=self.seed),
+            layers.RandomBrightness(0.2, value_range=(0, 255), seed=self.seed),
+            layers.RandomContrast(0.25, seed=self.seed),
+        ], name="aumentos")
 
     def _construir(self, nombre):
         constructor, _ = MODELOS[nombre]
         base = constructor(weights="imagenet", include_top=False,
                            input_shape=self.img_size + (3,))
         base.trainable = False
-        # Aumentos solo geométricos (solo actúan al entrenar). No hay flip
-        # horizontal: invertiría el texto de las señales. Tampoco brillo,
-        # porque la entrada ya viene preprocesada por cada arquitectura.
-        aug = keras.Sequential([
-            layers.RandomRotation(0.05),
-            layers.RandomZoom(0.15),
-            layers.RandomTranslation(0.08, 0.08),
-        ], name="aumentos")
         entrada = layers.Input(self.img_size + (3,))
-        x = base(aug(entrada))
+        x = base(entrada, training=False)
         x = layers.GlobalAveragePooling2D()(x)
         x = layers.Dropout(0.3)(x)
         salida = layers.Dense(self.num_classes, activation="softmax")(x)
@@ -182,7 +281,11 @@ class CNNTrainer:
         modelo.save(modelo_path)
         print(f"Modelo guardado: {modelo_path}")
 
+        ms_por_foto = self._medir_tiempo(modelo)
+        print(f"Tiempo de respuesta: {ms_por_foto:.1f} ms por foto")
+
         etiquetas_indices = list(range(self.num_classes))
+        self.reportes[nombre] = reporte_dict
         return {
             "modelo": nombre,
             "experimento": self.experimento,
@@ -196,10 +299,21 @@ class CNNTrainer:
             "f1_macro": f1_score(y_true, y_pred, labels=etiquetas_indices, average="macro", zero_division=0),
             "precision_macro": reporte_dict.get("macro avg", {}).get("precision", 0.0),
             "recall_macro": reporte_dict.get("macro avg", {}).get("recall", 0.0),
+            "ms_por_foto": ms_por_foto,
             "grafica_perdida": grafica_perdida,
             "grafica_confusion": grafica_cm,
             "archivo_reporte": f"reporte_clasificacion_{nombre}.txt",
         }
+
+    def _medir_tiempo(self, modelo, repeticiones=30):
+        """Milisegundos que tarda el modelo en clasificar UNA foto (como en el robot)."""
+        x = tf.zeros((1,) + self.img_size + (3,))
+        for _ in range(5):  # calentamiento
+            modelo(x, training=False)
+        inicio = time.perf_counter()
+        for _ in range(repeticiones):
+            modelo(x, training=False)
+        return (time.perf_counter() - inicio) / repeticiones * 1000
 
     def _guardar_classification_report(self, nombre, y_true, y_pred, model_dir, epocas, mejor_epoca):
         """Calcula el classification_report de scikit-learn, lo muestra en consola y lo guarda en disco."""
@@ -342,6 +456,29 @@ class CNNTrainer:
         for i, r in enumerate(ranking, 1):
             print(f"  {i}. {r['modelo']}  val_loss={r['val_loss']:.4f}  f1_macro={r['f1_macro']:.4f}")
         print(f"Selección guardada en: {ruta}")
+        self._guardar_tabla_mejores(ranking)
+
+    def _guardar_tabla_mejores(self, ranking):
+        """Tabla comparativa (sobre test) de los mejores: por clase y promedio macro."""
+        filas = []
+        for r in ranking:
+            rep = self.reportes[r["modelo"]]
+            for clase in list(self.class_names) + ["macro avg"]:
+                m = rep[clase]
+                filas.append({
+                    "modelo": r["modelo"],
+                    "clase": "PROMEDIO MACRO" if clase == "macro avg" else clase,
+                    "precision": round(m["precision"], 4),
+                    "recall": round(m["recall"], 4),
+                    "f1": round(m["f1-score"], 4),
+                    "soporte": int(m["support"]),
+                })
+            filas.append({"modelo": r["modelo"], "clase": "ACCURACY GLOBAL",
+                          "precision": "", "recall": "", "f1": round(rep["accuracy"], 4),
+                          "soporte": int(rep["macro avg"]["support"])})
+        ruta = os.path.join(self.exp_dir, "tabla_mejores.csv")
+        self._guardar_csv(filas, ruta)
+        print(f"Tabla comparativa de los mejores guardada en: {ruta}")
 
     @staticmethod
     def _guardar_csv(resultados, ruta):

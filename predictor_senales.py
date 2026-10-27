@@ -26,7 +26,7 @@ class PredictorSenales:
         self.nombre = modelo or seleccion["mejores"][0]["modelo"]
         self.img_size = tuple(seleccion.get("img_size", IMG_SIZE))
         # Las carpetas del dataset son 0..3: el índice indica la señal
-        self.clases = CLASES
+        self.clases = seleccion.get("clases", CLASES)
         self._preprocesar = MODELOS[self.nombre][1]
         self.modelo = tf.keras.models.load_model(
             os.path.join(carpeta, self.nombre, f"{self.nombre}.keras"))
@@ -34,6 +34,12 @@ class PredictorSenales:
 
     def predecir(self, foto):
         """Devuelve (clase, probabilidad). `foto` es una ruta o un frame BGR."""
+        probs = self.probabilidades(foto)
+        clase = max(probs, key=probs.get)
+        return clase, probs[clase]
+
+    def probabilidades(self, foto):
+        """Devuelve {clase: probabilidad} para las cuatro señales."""
         if isinstance(foto, str):
             # Sin rotar por EXIF, igual que tf.io en el entrenamiento
             foto = cv2.imread(foto, cv2.IMREAD_IGNORE_ORIENTATION | cv2.IMREAD_COLOR)
@@ -42,8 +48,7 @@ class PredictorSenales:
         rgb = cv2.cvtColor(foto, cv2.COLOR_BGR2RGB)
         rgb = cv2.resize(rgb, self.img_size[::-1]).astype(np.float32)
         probs = self.modelo(self._preprocesar(rgb[None]), training=False).numpy()[0]
-        i = int(np.argmax(probs))
-        return self.clases[i], float(probs[i])
+        return {c: float(p) for c, p in zip(self.clases, probs)}
 
 
 if __name__ == "__main__":

@@ -200,3 +200,6 @@ entrenamiento.log
 5_cnns/.venv/
 5_cnns/resultados/
 5_cnns/__pycache__/
+
+# Videos anotados de prueba (pesados)
+resultados/**/*.mp4

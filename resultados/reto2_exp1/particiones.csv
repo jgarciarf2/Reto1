@@ -1,0 +1,298 @@
+particion,clase,grupo,archivo
+train,PARE,0,5_cnns/dataset\0\20261027_095759.jpg
+train,PARE,1,5_cnns/dataset\0\20261027_095801.jpg
+train,PARE,3,5_cnns/dataset\0\20261027_095807.jpg
+train,PARE,4,5_cnns/dataset\0\20261027_095813.jpg
+train,PARE,6,5_cnns/dataset\0\20261027_095817.jpg
+train,PARE,8,5_cnns/dataset\0\20261027_095825.jpg
+train,PARE,9,5_cnns/dataset\0\20261027_095827.jpg
+train,PARE,10,5_cnns/dataset\0\20261027_095836.jpg
+train,PARE,12,5_cnns/dataset\0\20261027_095841.jpg
+train,PARE,13,5_cnns/dataset\0\20261027_095847.jpg
+train,PARE,13,5_cnns/dataset\0\20261027_095851.jpg
+train,PARE,15,5_cnns/dataset\0\20261027_095901.jpg
+train,PARE,16,5_cnns/dataset\0\20261027_095903.jpg
+train,PARE,16,5_cnns/dataset\0\20261027_095904.jpg
+train,PARE,17,5_cnns/dataset\0\IMG_1869.jpg
+train,PARE,17,5_cnns/dataset\0\IMG_1870.jpg
+train,PARE,17,5_cnns/dataset\0\IMG_1871.jpg
+train,PARE,17,5_cnns/dataset\0\IMG_1872.jpg
+train,PARE,17,5_cnns/dataset\0\IMG_1873.jpg
+train,PARE,17,5_cnns/dataset\0\IMG_1874.jpg
+train,PARE,17,5_cnns/dataset\0\IMG_1875.jpg
+train,PARE,17,5_cnns/dataset\0\IMG_1876.jpg
+train,PARE,20,5_cnns/dataset\0\IMG_1896.jpg
+train,PARE,22,5_cnns/dataset\0\IMG_1898.jpg
+train,PARE,23,5_cnns/dataset\0\IMG_1899.jpg
+train,PARE,25,5_cnns/dataset\0\IMG_1901.jpg
+train,PARE,27,5_cnns/dataset\0\IMG_1903.jpg
+train,PARE,28,5_cnns/dataset\0\IMG_1904.jpg
+train,PARE,29,5_cnns/dataset\0\IMG_1930.jpg
+train,PARE,34,5_cnns/dataset\0\WhatsApp Image 2026-10-27 at 10.21.43 AM (1).jpeg
+train,PARE,34,5_cnns/dataset\0\WhatsApp Image 2026-10-27 at 10.21.43 AM.jpeg
+train,PARE,36,5_cnns/dataset\0\WhatsApp Image 2026-10-27 at 10.22.04 AM.jpeg
+train,PARE,37,5_cnns/dataset\0\WhatsApp Image 2026-10-27 at 9.43.44 AM (1).jpeg
+train,PARE,37,5_cnns/dataset\0\WhatsApp Image 2026-10-27 at 9.43.44 AM (2).jpeg
+train,PARE,37,5_cnns/dataset\0\WhatsApp Image 2026-10-27 at 9.43.44 AM (3).jpeg
+train,PARE,37,5_cnns/dataset\0\WhatsApp Image 2026-10-27 at 9.43.44 AM.jpeg
+train,PARE,37,5_cnns/dataset\0\WhatsApp Image 2026-10-27 at 9.43.45 AM (1).jpeg
+train,PARE,37,5_cnns/dataset\0\WhatsApp Image 2026-10-27 at 9.43.45 AM (2).jpeg
+train,PARE,37,5_cnns/dataset\0\WhatsApp Image 2026-10-27 at 9.43.45 AM.jpeg
+train,PARE,38,5_cnns/dataset\0\WhatsApp Image 2026-10-27 at 9.43.46 AM (1).jpeg
+train,PARE,38,5_cnns/dataset\0\WhatsApp Image 2026-10-27 at 9.43.46 AM (2).jpeg
+train,PARE,38,5_cnns/dataset\0\WhatsApp Image 2026-10-27 at 9.43.46 AM (3).jpeg
+train,PARE,38,5_cnns/dataset\0\WhatsApp Image 2026-10-27 at 9.43.46 AM.jpeg
+train,PARE,39,5_cnns/dataset\0\WhatsApp Image 2026-10-27 at 9.43.47 AM (1).jpeg
+train,PARE,39,5_cnns/dataset\0\WhatsApp Image 2026-10-27 at 9.43.47 AM (2).jpeg
+train,PARE,39,5_cnns/dataset\0\WhatsApp Image 2026-10-27 at 9.43.47 AM (3).jpeg
+train,PARE,39,5_cnns/dataset\0\WhatsApp Image 2026-10-27 at 9.43.47 AM.jpeg
+train,PARE,37,5_cnns/dataset\0\WhatsApp Image 2026-10-27 at 9.43.48 AM (1).jpeg
+train,PARE,37,5_cnns/dataset\0\WhatsApp Image 2026-10-27 at 9.43.48 AM (2).jpeg
+train,PARE,37,5_cnns/dataset\0\WhatsApp Image 2026-10-27 at 9.43.48 AM.jpeg
+train,SIGA,43,5_cnns/dataset\1\20261027_095913.jpg
+train,SIGA,45,5_cnns/dataset\1\20261027_095917.jpg
+train,SIGA,49,5_cnns/dataset\1\20261027_095936.jpg
+train,SIGA,50,5_cnns/dataset\1\20261027_095952.jpg
+train,SIGA,51,5_cnns/dataset\1\20261027_095955.jpg
+train,SIGA,52,5_cnns/dataset\1\20261027_100004.jpg
+train,SIGA,52,5_cnns/dataset\1\20261027_100005.jpg
+train,SIGA,52,5_cnns/dataset\1\20261027_100012.jpg
+train,SIGA,57,5_cnns/dataset\1\IMG_1832.jpg
+train,SIGA,57,5_cnns/dataset\1\IMG_1833.jpg
+train,SIGA,58,5_cnns/dataset\1\IMG_1834.jpg
+train,SIGA,58,5_cnns/dataset\1\IMG_1835.jpg
+train,SIGA,58,5_cnns/dataset\1\IMG_1836.jpg
+train,SIGA,59,5_cnns/dataset\1\IMG_1837.jpg
+train,SIGA,59,5_cnns/dataset\1\IMG_1838.jpg
+train,SIGA,59,5_cnns/dataset\1\IMG_1839.jpg
+train,SIGA,59,5_cnns/dataset\1\IMG_1840.jpg
+train,SIGA,59,5_cnns/dataset\1\IMG_1841.jpg
+train,SIGA,59,5_cnns/dataset\1\IMG_1842.jpg
+train,SIGA,59,5_cnns/dataset\1\IMG_1843.jpg
+train,SIGA,59,5_cnns/dataset\1\IMG_1844.jpg
+train,SIGA,59,5_cnns/dataset\1\IMG_1845.jpg
+train,SIGA,59,5_cnns/dataset\1\IMG_1846.jpg
+train,SIGA,59,5_cnns/dataset\1\IMG_1847.jpg
+train,SIGA,59,5_cnns/dataset\1\IMG_1848.jpg
+train,SIGA,61,5_cnns/dataset\1\IMG_1917.jpg
+train,SIGA,62,5_cnns/dataset\1\IMG_1918.jpg
+train,SIGA,63,5_cnns/dataset\1\IMG_1919.jpg
+train,SIGA,65,5_cnns/dataset\1\WhatsApp Image 2026-10-27 at 10.21.11 AM.jpeg
+train,SIGA,67,5_cnns/dataset\1\WhatsApp Image 2026-10-27 at 10.21.13 AM (1).jpeg
+train,SIGA,67,5_cnns/dataset\1\WhatsApp Image 2026-10-27 at 10.21.13 AM.jpeg
+train,SIGA,68,5_cnns/dataset\1\WhatsApp Image 2026-10-27 at 10.21.15 AM (1).jpeg
+train,SIGA,68,5_cnns/dataset\1\WhatsApp Image 2026-10-27 at 10.21.15 AM.jpeg
+train,SIGA,69,5_cnns/dataset\1\WhatsApp Image 2026-10-27 at 10.21.27 AM (1).jpeg
+train,SIGA,69,5_cnns/dataset\1\WhatsApp Image 2026-10-27 at 10.21.27 AM (2).jpeg
+train,SIGA,69,5_cnns/dataset\1\WhatsApp Image 2026-10-27 at 10.21.27 AM (3).jpeg
+train,SIGA,69,5_cnns/dataset\1\WhatsApp Image 2026-10-27 at 10.21.27 AM.jpeg
+train,SIGA,70,5_cnns/dataset\1\WhatsApp Image 2026-10-27 at 10.21.28 AM (1).jpeg
+train,SIGA,70,5_cnns/dataset\1\WhatsApp Image 2026-10-27 at 10.21.28 AM.jpeg
+train,SIGA,71,5_cnns/dataset\1\WhatsApp Image 2026-10-27 at 10.21.29 AM.jpeg
+train,SIGA,74,5_cnns/dataset\1\WhatsApp Image 2026-10-27 at 9.44.20 AM.jpeg
+train,SIGA,76,5_cnns/dataset\1\WhatsApp Image 2026-10-27 at 9.44.22 AM.jpeg
+train,SIGA,78,5_cnns/dataset\1\WhatsApp Image 2026-10-27 at 9.44.26 AM (1).jpeg
+train,SIGA,78,5_cnns/dataset\1\WhatsApp Image 2026-10-27 at 9.44.26 AM.jpeg
+train,SIGA,79,5_cnns/dataset\1\WhatsApp Image 2026-10-27 at 9.44.28 AM (1).jpeg
+train,SIGA,79,5_cnns/dataset\1\WhatsApp Image 2026-10-27 at 9.44.28 AM.jpeg
+train,SIGA,80,5_cnns/dataset\1\WhatsApp Image 2026-10-27 at 9.44.42 AM.jpeg
+train,SIGA,79,5_cnns/dataset\1\WhatsApp Image 2026-10-27 at 9.44.43 AM (1).jpeg
+train,SIGA,79,5_cnns/dataset\1\WhatsApp Image 2026-10-27 at 9.44.43 AM.jpeg
+train,SIGA,82,5_cnns/dataset\1\WhatsApp Image 2026-10-27 at 9.44.45 AM (1).jpeg
+train,SIGA,82,5_cnns/dataset\1\WhatsApp Image 2026-10-27 at 9.44.45 AM (2).jpeg
+train,SIGA,82,5_cnns/dataset\1\WhatsApp Image 2026-10-27 at 9.44.45 AM.jpeg
+train,SIGA,82,5_cnns/dataset\1\WhatsApp Image 2026-10-27 at 9.44.46 AM (2).jpeg
+train,SIGA,82,5_cnns/dataset\1\WhatsApp Image 2026-10-27 at 9.44.46 AM (3).jpeg
+train,SIGA,82,5_cnns/dataset\1\WhatsApp Image 2026-10-27 at 9.44.46 AM.jpeg
+train,SIGA,83,5_cnns/dataset\1\WhatsApp Image 2026-10-27 at 9.44.47 AM (1).jpeg
+train,SIGA,83,5_cnns/dataset\1\WhatsApp Image 2026-10-27 at 9.44.47 AM (2).jpeg
+train,SIGA,83,5_cnns/dataset\1\WhatsApp Image 2026-10-27 at 9.44.47 AM.jpeg
+train,VELOCIDAD_60,85,5_cnns/dataset\2\20261027_100226.jpg
+train,VELOCIDAD_60,86,5_cnns/dataset\2\20261027_100228.jpg
+train,VELOCIDAD_60,87,5_cnns/dataset\2\20261027_100236.jpg
+train,VELOCIDAD_60,90,5_cnns/dataset\2\20261027_100241.jpg
+train,VELOCIDAD_60,91,5_cnns/dataset\2\20261027_100244.jpg
+train,VELOCIDAD_60,92,5_cnns/dataset\2\20261027_100248.jpg
+train,VELOCIDAD_60,93,5_cnns/dataset\2\20261027_100251.jpg
+train,VELOCIDAD_60,94,5_cnns/dataset\2\20261027_100301.jpg
+train,VELOCIDAD_60,95,5_cnns/dataset\2\20261027_100302.jpg
+train,VELOCIDAD_60,97,5_cnns/dataset\2\20261027_100308.jpg
+train,VELOCIDAD_60,98,5_cnns/dataset\2\20261027_100322.jpg
+train,VELOCIDAD_60,99,5_cnns/dataset\2\20261027_100324.jpg
+train,VELOCIDAD_60,100,5_cnns/dataset\2\20261027_100326.jpg
+train,VELOCIDAD_60,101,5_cnns/dataset\2\20261027_100351.jpg
+train,VELOCIDAD_60,103,5_cnns/dataset\2\20261027_100358.jpg
+train,VELOCIDAD_60,104,5_cnns/dataset\2\WhatsApp Image 2026-10-27 at 10.21.37 AM (3).jpeg
+train,VELOCIDAD_60,104,5_cnns/dataset\2\WhatsApp Image 2026-10-27 at 10.21.37 AM (4).jpeg
+train,VELOCIDAD_60,105,5_cnns/dataset\2\WhatsApp Image 2026-10-27 at 10.21.38 AM (1).jpeg
+train,VELOCIDAD_60,105,5_cnns/dataset\2\WhatsApp Image 2026-10-27 at 10.21.38 AM (2).jpeg
+train,VELOCIDAD_60,105,5_cnns/dataset\2\WhatsApp Image 2026-10-27 at 10.21.38 AM.jpeg
+train,VELOCIDAD_60,106,5_cnns/dataset\2\WhatsApp Image 2026-10-27 at 10.21.39 AM (1).jpeg
+train,VELOCIDAD_60,106,5_cnns/dataset\2\WhatsApp Image 2026-10-27 at 10.21.39 AM (2).jpeg
+train,VELOCIDAD_60,106,5_cnns/dataset\2\WhatsApp Image 2026-10-27 at 10.21.39 AM.jpeg
+train,VELOCIDAD_60,108,5_cnns/dataset\2\WhatsApp Image 2026-10-27 at 9.45.25 AM.jpeg
+train,VELOCIDAD_60,108,5_cnns/dataset\2\WhatsApp Image 2026-10-27 at 9.45.27 AM.jpeg
+train,VELOCIDAD_60,108,5_cnns/dataset\2\WhatsApp Image 2026-10-27 at 9.45.28 AM.jpeg
+train,VELOCIDAD_60,109,5_cnns/dataset\2\WhatsApp Image 2026-10-27 at 9.45.29 AM.jpeg
+train,VELOCIDAD_60,111,5_cnns/dataset\2\WhatsApp Image 2026-10-27 at 9.45.35 AM.jpeg
+train,VELOCIDAD_60,112,5_cnns/dataset\2\WhatsApp Image 2026-10-27 at 9.45.54 AM (1).jpeg
+train,VELOCIDAD_60,112,5_cnns/dataset\2\WhatsApp Image 2026-10-27 at 9.45.54 AM (2).jpeg
+train,VELOCIDAD_60,112,5_cnns/dataset\2\WhatsApp Image 2026-10-27 at 9.45.54 AM.jpeg
+train,VELOCIDAD_60,112,5_cnns/dataset\2\WhatsApp Image 2026-10-27 at 9.45.55 AM (1).jpeg
+train,VELOCIDAD_60,112,5_cnns/dataset\2\WhatsApp Image 2026-10-27 at 9.45.55 AM (2).jpeg
+train,VELOCIDAD_60,112,5_cnns/dataset\2\WhatsApp Image 2026-10-27 at 9.45.55 AM.jpeg
+train,VELOCIDAD_60,112,5_cnns/dataset\2\WhatsApp Image 2026-10-27 at 9.46.50 AM (2).jpeg
+train,ZONA_ESCOLAR,113,5_cnns/dataset\3\20261027_100032.jpg
+train,ZONA_ESCOLAR,114,5_cnns/dataset\3\20261027_100033.jpg
+train,ZONA_ESCOLAR,116,5_cnns/dataset\3\20261027_100038.jpg
+train,ZONA_ESCOLAR,117,5_cnns/dataset\3\20261027_100040.jpg
+train,ZONA_ESCOLAR,118,5_cnns/dataset\3\20261027_100048.jpg
+train,ZONA_ESCOLAR,119,5_cnns/dataset\3\20261027_100050.jpg
+train,ZONA_ESCOLAR,119,5_cnns/dataset\3\20261027_100052.jpg
+train,ZONA_ESCOLAR,120,5_cnns/dataset\3\20261027_100054.jpg
+train,ZONA_ESCOLAR,121,5_cnns/dataset\3\20261027_100057.jpg
+train,ZONA_ESCOLAR,122,5_cnns/dataset\3\20261027_100119.jpg
+train,ZONA_ESCOLAR,122,5_cnns/dataset\3\20261027_100121.jpg
+train,ZONA_ESCOLAR,122,5_cnns/dataset\3\20261027_100123.jpg
+train,ZONA_ESCOLAR,122,5_cnns/dataset\3\20261027_100124.jpg
+train,ZONA_ESCOLAR,123,5_cnns/dataset\3\20261027_100132.jpg
+train,ZONA_ESCOLAR,124,5_cnns/dataset\3\20261027_100134.jpg
+train,ZONA_ESCOLAR,126,5_cnns/dataset\3\20261027_100155.jpg
+train,ZONA_ESCOLAR,128,5_cnns/dataset\3\WhatsApp Image 2026-10-27 at 10.21.31 AM (2).jpeg
+train,ZONA_ESCOLAR,128,5_cnns/dataset\3\WhatsApp Image 2026-10-27 at 10.21.31 AM (3).jpeg
+train,ZONA_ESCOLAR,129,5_cnns/dataset\3\WhatsApp Image 2026-10-27 at 10.21.32 AM (1).jpeg
+train,ZONA_ESCOLAR,129,5_cnns/dataset\3\WhatsApp Image 2026-10-27 at 10.21.32 AM (2).jpeg
+train,ZONA_ESCOLAR,129,5_cnns/dataset\3\WhatsApp Image 2026-10-27 at 10.21.32 AM (3).jpeg
+train,ZONA_ESCOLAR,129,5_cnns/dataset\3\WhatsApp Image 2026-10-27 at 10.21.32 AM (4).jpeg
+train,ZONA_ESCOLAR,129,5_cnns/dataset\3\WhatsApp Image 2026-10-27 at 10.21.32 AM (5).jpeg
+train,ZONA_ESCOLAR,129,5_cnns/dataset\3\WhatsApp Image 2026-10-27 at 10.21.32 AM.jpeg
+train,ZONA_ESCOLAR,130,5_cnns/dataset\3\WhatsApp Image 2026-10-27 at 10.21.33 AM (1).jpeg
+train,ZONA_ESCOLAR,130,5_cnns/dataset\3\WhatsApp Image 2026-10-27 at 10.21.33 AM (2).jpeg
+train,ZONA_ESCOLAR,130,5_cnns/dataset\3\WhatsApp Image 2026-10-27 at 10.21.33 AM (3).jpeg
+train,ZONA_ESCOLAR,130,5_cnns/dataset\3\WhatsApp Image 2026-10-27 at 10.21.33 AM (4).jpeg
+train,ZONA_ESCOLAR,130,5_cnns/dataset\3\WhatsApp Image 2026-10-27 at 10.21.33 AM.jpeg
+train,ZONA_ESCOLAR,131,5_cnns/dataset\3\WhatsApp Image 2026-10-27 at 10.21.34 AM (1).jpeg
+train,ZONA_ESCOLAR,131,5_cnns/dataset\3\WhatsApp Image 2026-10-27 at 10.21.34 AM (2).jpeg
+train,ZONA_ESCOLAR,131,5_cnns/dataset\3\WhatsApp Image 2026-10-27 at 10.21.34 AM (3).jpeg
+train,ZONA_ESCOLAR,131,5_cnns/dataset\3\WhatsApp Image 2026-10-27 at 10.21.34 AM (4).jpeg
+train,ZONA_ESCOLAR,131,5_cnns/dataset\3\WhatsApp Image 2026-10-27 at 10.21.34 AM.jpeg
+train,ZONA_ESCOLAR,133,5_cnns/dataset\3\WhatsApp Image 2026-10-27 at 10.21.36 AM (1).jpeg
+train,ZONA_ESCOLAR,133,5_cnns/dataset\3\WhatsApp Image 2026-10-27 at 10.21.36 AM (2).jpeg
+train,ZONA_ESCOLAR,133,5_cnns/dataset\3\WhatsApp Image 2026-10-27 at 10.21.36 AM (4).jpeg
+train,ZONA_ESCOLAR,133,5_cnns/dataset\3\WhatsApp Image 2026-10-27 at 10.21.36 AM.jpeg
+train,ZONA_ESCOLAR,135,5_cnns/dataset\3\WhatsApp Image 2026-10-27 at 9.46.07 AM.jpeg
+train,ZONA_ESCOLAR,137,5_cnns/dataset\3\WhatsApp Image 2026-10-27 at 9.46.13 AM.jpeg
+train,ZONA_ESCOLAR,139,5_cnns/dataset\3\WhatsApp Image 2026-10-27 at 9.46.42 AM.jpeg
+val,PARE,2,5_cnns/dataset\0\20261027_095803.jpg
+val,PARE,7,5_cnns/dataset\0\20261027_095823.jpg
+val,PARE,18,5_cnns/dataset\0\IMG_1877.jpg
+val,PARE,19,5_cnns/dataset\0\IMG_1878.jpg
+val,PARE,19,5_cnns/dataset\0\IMG_1879.jpg
+val,PARE,19,5_cnns/dataset\0\IMG_1880.jpg
+val,PARE,21,5_cnns/dataset\0\IMG_1897.jpg
+val,PARE,30,5_cnns/dataset\0\IMG_1931.jpg
+val,PARE,32,5_cnns/dataset\0\WhatsApp Image 2026-10-27 at 10.21.41 AM (1).jpeg
+val,PARE,32,5_cnns/dataset\0\WhatsApp Image 2026-10-27 at 10.21.41 AM (2).jpeg
+val,PARE,32,5_cnns/dataset\0\WhatsApp Image 2026-10-27 at 10.21.41 AM.jpeg
+val,PARE,35,5_cnns/dataset\0\WhatsApp Image 2026-10-27 at 10.21.44 AM.jpeg
+val,PARE,40,5_cnns/dataset\0\WhatsApp Image 2026-10-27 at 9.43.49 AM (1).jpeg
+val,PARE,40,5_cnns/dataset\0\WhatsApp Image 2026-10-27 at 9.43.49 AM (2).jpeg
+val,PARE,40,5_cnns/dataset\0\WhatsApp Image 2026-10-27 at 9.43.49 AM (3).jpeg
+val,PARE,40,5_cnns/dataset\0\WhatsApp Image 2026-10-27 at 9.43.49 AM.jpeg
+val,SIGA,44,5_cnns/dataset\1\20261027_095915.jpg
+val,SIGA,48,5_cnns/dataset\1\20261027_095933.jpg
+val,SIGA,54,5_cnns/dataset\1\20261027_100010.jpg
+val,SIGA,60,5_cnns/dataset\1\IMG_1849.jpg
+val,SIGA,60,5_cnns/dataset\1\IMG_1850.jpg
+val,SIGA,60,5_cnns/dataset\1\IMG_1851.jpg
+val,SIGA,60,5_cnns/dataset\1\IMG_1852.jpg
+val,SIGA,64,5_cnns/dataset\1\WhatsApp Image 2026-10-27 at 10.21.10 AM.jpeg
+val,SIGA,72,5_cnns/dataset\1\WhatsApp Image 2026-10-27 at 10.21.30 AM (1).jpeg
+val,SIGA,72,5_cnns/dataset\1\WhatsApp Image 2026-10-27 at 10.21.30 AM (2).jpeg
+val,SIGA,72,5_cnns/dataset\1\WhatsApp Image 2026-10-27 at 10.21.30 AM (3).jpeg
+val,SIGA,73,5_cnns/dataset\1\WhatsApp Image 2026-10-27 at 10.21.31 AM (1).jpeg
+val,SIGA,73,5_cnns/dataset\1\WhatsApp Image 2026-10-27 at 10.21.31 AM.jpeg
+val,SIGA,75,5_cnns/dataset\1\WhatsApp Image 2026-10-27 at 9.44.21 AM.jpeg
+val,SIGA,77,5_cnns/dataset\1\WhatsApp Image 2026-10-27 at 9.44.23 AM.jpeg
+val,SIGA,81,5_cnns/dataset\1\WhatsApp Image 2026-10-27 at 9.44.44 AM (1).jpeg
+val,SIGA,81,5_cnns/dataset\1\WhatsApp Image 2026-10-27 at 9.44.44 AM (2).jpeg
+val,SIGA,81,5_cnns/dataset\1\WhatsApp Image 2026-10-27 at 9.44.44 AM.jpeg
+val,SIGA,81,5_cnns/dataset\1\WhatsApp Image 2026-10-27 at 9.45.57 AM.jpeg
+val,SIGA,81,5_cnns/dataset\1\WhatsApp Image 2026-10-27 at 9.46.51 AM.jpeg
+val,VELOCIDAD_60,110,5_cnns/dataset\2\WhatsApp Image 2026-10-27 at 9.45.30 AM.jpeg
+val,VELOCIDAD_60,110,5_cnns/dataset\2\WhatsApp Image 2026-10-27 at 9.45.31 AM (1).jpeg
+val,VELOCIDAD_60,110,5_cnns/dataset\2\WhatsApp Image 2026-10-27 at 9.45.31 AM.jpeg
+val,VELOCIDAD_60,110,5_cnns/dataset\2\WhatsApp Image 2026-10-27 at 9.45.33 AM.jpeg
+val,VELOCIDAD_60,110,5_cnns/dataset\2\WhatsApp Image 2026-10-27 at 9.45.43 AM.jpeg
+val,VELOCIDAD_60,110,5_cnns/dataset\2\WhatsApp Image 2026-10-27 at 9.45.44 AM.jpeg
+val,VELOCIDAD_60,110,5_cnns/dataset\2\WhatsApp Image 2026-10-27 at 9.45.51 AM.jpeg
+val,VELOCIDAD_60,110,5_cnns/dataset\2\WhatsApp Image 2026-10-27 at 9.45.53 AM (1).jpeg
+val,VELOCIDAD_60,110,5_cnns/dataset\2\WhatsApp Image 2026-10-27 at 9.45.53 AM (2).jpeg
+val,VELOCIDAD_60,110,5_cnns/dataset\2\WhatsApp Image 2026-10-27 at 9.45.53 AM.jpeg
+val,VELOCIDAD_60,110,5_cnns/dataset\2\WhatsApp Image 2026-10-27 at 9.45.56 AM (1).jpeg
+val,VELOCIDAD_60,110,5_cnns/dataset\2\WhatsApp Image 2026-10-27 at 9.45.56 AM (2).jpeg
+val,VELOCIDAD_60,110,5_cnns/dataset\2\WhatsApp Image 2026-10-27 at 9.45.56 AM.jpeg
+val,ZONA_ESCOLAR,115,5_cnns/dataset\3\20261027_100035.jpg
+val,ZONA_ESCOLAR,125,5_cnns/dataset\3\20261027_100150.jpg
+val,ZONA_ESCOLAR,125,5_cnns/dataset\3\20261027_100152.jpg
+val,ZONA_ESCOLAR,127,5_cnns/dataset\3\20261027_100203.jpg
+val,ZONA_ESCOLAR,132,5_cnns/dataset\3\WhatsApp Image 2026-10-27 at 10.21.35 AM (1).jpeg
+val,ZONA_ESCOLAR,132,5_cnns/dataset\3\WhatsApp Image 2026-10-27 at 10.21.35 AM (2).jpeg
+val,ZONA_ESCOLAR,132,5_cnns/dataset\3\WhatsApp Image 2026-10-27 at 10.21.35 AM (3).jpeg
+val,ZONA_ESCOLAR,132,5_cnns/dataset\3\WhatsApp Image 2026-10-27 at 10.21.35 AM (4).jpeg
+val,ZONA_ESCOLAR,132,5_cnns/dataset\3\WhatsApp Image 2026-10-27 at 10.21.35 AM.jpeg
+val,ZONA_ESCOLAR,134,5_cnns/dataset\3\WhatsApp Image 2026-10-27 at 10.21.37 AM (1).jpeg
+val,ZONA_ESCOLAR,134,5_cnns/dataset\3\WhatsApp Image 2026-10-27 at 10.21.37 AM (2).jpeg
+val,ZONA_ESCOLAR,134,5_cnns/dataset\3\WhatsApp Image 2026-10-27 at 10.21.37 AM (3).jpeg
+val,ZONA_ESCOLAR,136,5_cnns/dataset\3\WhatsApp Image 2026-10-27 at 9.46.11 AM.jpeg
+test,PARE,5,5_cnns/dataset\0\20261027_095815.jpg
+test,PARE,11,5_cnns/dataset\0\20261027_095837.jpg
+test,PARE,11,5_cnns/dataset\0\20261027_095839.jpg
+test,PARE,14,5_cnns/dataset\0\20261027_095853.jpg
+test,PARE,24,5_cnns/dataset\0\IMG_1900.jpg
+test,PARE,26,5_cnns/dataset\0\IMG_1902.jpg
+test,PARE,31,5_cnns/dataset\0\IMG_1932.jpg
+test,PARE,33,5_cnns/dataset\0\WhatsApp Image 2026-10-27 at 10.21.42 AM (1).jpeg
+test,PARE,33,5_cnns/dataset\0\WhatsApp Image 2026-10-27 at 10.21.42 AM (2).jpeg
+test,PARE,33,5_cnns/dataset\0\WhatsApp Image 2026-10-27 at 10.21.42 AM.jpeg
+test,PARE,41,5_cnns/dataset\0\WhatsApp Image 2026-10-27 at 9.43.50 AM.jpeg
+test,SIGA,42,5_cnns/dataset\1\20261027_095911.jpg
+test,SIGA,46,5_cnns/dataset\1\20261027_095926.jpg
+test,SIGA,47,5_cnns/dataset\1\20261027_095928.jpg
+test,SIGA,47,5_cnns/dataset\1\20261027_095930.jpg
+test,SIGA,47,5_cnns/dataset\1\20261027_095938.jpg
+test,SIGA,53,5_cnns/dataset\1\20261027_100007.jpg
+test,SIGA,55,5_cnns/dataset\1\20261027_100014.jpg
+test,SIGA,56,5_cnns/dataset\1\20261027_100021.jpg
+test,SIGA,56,5_cnns/dataset\1\20261027_100022.jpg
+test,SIGA,66,5_cnns/dataset\1\WhatsApp Image 2026-10-27 at 10.21.12 AM (1).jpeg
+test,SIGA,66,5_cnns/dataset\1\WhatsApp Image 2026-10-27 at 10.21.12 AM (2).jpeg
+test,SIGA,66,5_cnns/dataset\1\WhatsApp Image 2026-10-27 at 10.21.12 AM.jpeg
+test,VELOCIDAD_60,84,5_cnns/dataset\2\20261027_100224.jpg
+test,VELOCIDAD_60,88,5_cnns/dataset\2\20261027_100237.jpg
+test,VELOCIDAD_60,89,5_cnns/dataset\2\20261027_100239.jpg
+test,VELOCIDAD_60,96,5_cnns/dataset\2\20261027_100304.jpg
+test,VELOCIDAD_60,102,5_cnns/dataset\2\20261027_100353.jpg
+test,VELOCIDAD_60,107,5_cnns/dataset\2\WhatsApp Image 2026-10-27 at 10.21.40 AM (1).jpeg
+test,VELOCIDAD_60,107,5_cnns/dataset\2\WhatsApp Image 2026-10-27 at 10.21.40 AM.jpeg
+test,ZONA_ESCOLAR,138,5_cnns/dataset\3\WhatsApp Image 2026-10-27 at 9.46.14 AM.jpeg
+test,ZONA_ESCOLAR,138,5_cnns/dataset\3\WhatsApp Image 2026-10-27 at 9.46.39 AM.jpeg
+test,ZONA_ESCOLAR,138,5_cnns/dataset\3\WhatsApp Image 2026-10-27 at 9.46.40 AM (1).jpeg
+test,ZONA_ESCOLAR,138,5_cnns/dataset\3\WhatsApp Image 2026-10-27 at 9.46.40 AM.jpeg
+test,ZONA_ESCOLAR,138,5_cnns/dataset\3\WhatsApp Image 2026-10-27 at 9.46.41 AM.jpeg
+test,ZONA_ESCOLAR,138,5_cnns/dataset\3\WhatsApp Image 2026-10-27 at 9.46.43 AM.jpeg
+test,ZONA_ESCOLAR,138,5_cnns/dataset\3\WhatsApp Image 2026-10-27 at 9.46.44 AM.jpeg
+test,ZONA_ESCOLAR,138,5_cnns/dataset\3\WhatsApp Image 2026-10-27 at 9.46.45 AM.jpeg
+test,ZONA_ESCOLAR,138,5_cnns/dataset\3\WhatsApp Image 2026-10-27 at 9.46.46 AM (1).jpeg
+test,ZONA_ESCOLAR,138,5_cnns/dataset\3\WhatsApp Image 2026-10-27 at 9.46.46 AM (2).jpeg
+test,ZONA_ESCOLAR,138,5_cnns/dataset\3\WhatsApp Image 2026-10-27 at 9.46.46 AM.jpeg
+test,ZONA_ESCOLAR,138,5_cnns/dataset\3\WhatsApp Image 2026-10-27 at 9.46.47 AM (1).jpeg
+test,ZONA_ESCOLAR,138,5_cnns/dataset\3\WhatsApp Image 2026-10-27 at 9.46.47 AM.jpeg
+test,ZONA_ESCOLAR,138,5_cnns/dataset\3\WhatsApp Image 2026-10-27 at 9.46.48 AM (1).jpeg
+test,ZONA_ESCOLAR,138,5_cnns/dataset\3\WhatsApp Image 2026-10-27 at 9.46.48 AM (2).jpeg
+test,ZONA_ESCOLAR,138,5_cnns/dataset\3\WhatsApp Image 2026-10-27 at 9.46.48 AM.jpeg
+test,ZONA_ESCOLAR,138,5_cnns/dataset\3\WhatsApp Image 2026-10-27 at 9.46.49 AM (1).jpeg
+test,ZONA_ESCOLAR,138,5_cnns/dataset\3\WhatsApp Image 2026-10-27 at 9.46.49 AM (2).jpeg
+test,ZONA_ESCOLAR,138,5_cnns/dataset\3\WhatsApp Image 2026-10-27 at 9.46.49 AM.jpeg
+test,ZONA_ESCOLAR,138,5_cnns/dataset\3\WhatsApp Image 2026-10-27 at 9.46.50 AM (1).jpeg
+test,ZONA_ESCOLAR,138,5_cnns/dataset\3\WhatsApp Image 2026-10-27 at 9.46.50 AM.jpeg
