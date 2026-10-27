@@ -187,7 +187,7 @@ pip-selfcheck.json
 
 # End of https://www.toptal.com/developers/gitignore/api/python,venv
 # Apuntes de clase y archivos del sistema
-# 5_cnns/
+5_cnns/
 .DS_Store
 
 # Fotos originales del robot (pesadas, ~380 MB)
