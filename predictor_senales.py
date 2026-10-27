@@ -33,21 +33,20 @@ class PredictorSenales:
         self.modelo(np.zeros((1,) + self.img_size + (3,), np.float32))  # calentamiento
 
     @staticmethod
-    def _recorte_proporcion(foto):
+    def _a_proporcion(foto):
         """
-        Las fotos de entrenamiento son 3:4 (vertical) o 4:3 (apaisada). Un frame
-        16:9 del iPhone se recorta al centro con esa proporción para que no se
-        deforme distinto al aplastarlo a 224x224.
+        Las fotos de entrenamiento son 3:4 (vertical) o 4:3 (apaisada) y se
+        aplastan a 224x224. Un frame 16:9 o 9:16 se rellena con bordes hasta
+        esa proporción (sin recortar, para no perder señales en las orillas),
+        así las formas se deforman igual que en el entrenamiento.
         """
         alto, ancho = foto.shape[:2]
         proporcion = 3 / 4 if alto >= ancho else 4 / 3  # ancho / alto
-        if ancho / alto > proporcion:
-            nuevo = int(alto * proporcion)
-            x = (ancho - nuevo) // 2
-            return foto[:, x:x + nuevo]
-        nuevo = int(ancho / proporcion)
-        y = (alto - nuevo) // 2
-        return foto[y:y + nuevo, :]
+        if ancho / alto < proporcion:  # muy angosto: se agregan lados
+            extra = (int(alto * proporcion) - ancho) // 2
+            return cv2.copyMakeBorder(foto, 0, 0, extra, extra, cv2.BORDER_REPLICATE)
+        extra = (int(ancho / proporcion) - alto) // 2  # muy ancho: arriba y abajo
+        return cv2.copyMakeBorder(foto, extra, extra, 0, 0, cv2.BORDER_REPLICATE)
 
     def predecir(self, foto):
         """Devuelve (clase, probabilidad). `foto` es una ruta o un frame BGR."""
@@ -56,7 +55,7 @@ class PredictorSenales:
             foto = cv2.imread(foto, cv2.IMREAD_IGNORE_ORIENTATION | cv2.IMREAD_COLOR)
             if foto is None:
                 raise FileNotFoundError("No se pudo leer la imagen.")
-        foto = self._recorte_proporcion(foto)
+        foto = self._a_proporcion(foto)
         rgb = cv2.cvtColor(foto, cv2.COLOR_BGR2RGB)
         rgb = cv2.resize(rgb, self.img_size[::-1]).astype(np.float32)
         probs = self.modelo(self._preprocesar(rgb[None]), training=False).numpy()[0]

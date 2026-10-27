@@ -51,10 +51,11 @@ INTERVALOS_ADELANTE = {
     "VELOCIDAD_60": 0.5,
 }
 
-# Giro del frame de la cámara en grados: 0, 90, -90 o 180. La webcam del
-# computador va en 0; el stream del móvil vertical suele necesitar 90.
+# Giro del frame de la cámara en grados: 0, 90, -90 o 180. Con el iPhone sobre
+# el carro (video_test.MOV) -90 deja el robot abajo y la pista hacia arriba,
+# igual que las fotos de entrenamiento. La webcam del Mac iría en 0.
 # También se puede probar sin editar: python main.py 2 --rotar=90
-ROTACION_CAMARA = 0
+ROTACION_CAMARA = -90
 
 # Probabilidad mínima (0 a 1) para que la CNN cuente una señal. Más baja =
 # reconoce más fácil pero se equivoca más. Mira el % en pantalla para ajustarla.
