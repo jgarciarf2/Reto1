@@ -48,14 +48,22 @@ class AplicacionDetector:
 
     COLOR_SIGUIENDO = (0, 200, 0)
     COLOR_DETENIDO = (0, 0, 255)
-    # El stream del movil llega apaisado aunque el telefono este vertical.
-    # Cambia a ROTATE_90_COUNTERCLOCKWISE si la imagen queda invertida.
-    ROTACION_CAMARA = cv2.ROTATE_90_CLOCKWISE
+    # Grados que se gira el frame para verlo derecho (0, 90, -90 o 180).
+    # La webcam del computador va en 0; el stream del móvil suele necesitar 90.
+    # Se cambia en config_robot.ROTACION_CAMARA o con --rotar=90.
+    ROTACIONES = {
+        0: None,
+        90: cv2.ROTATE_90_CLOCKWISE,
+        -90: cv2.ROTATE_90_COUNTERCLOCKWISE,
+        180: cv2.ROTATE_180,
+    }
     # La CNN es la parte pesada: se consulta ~4 veces por segundo, no en cada frame.
     INTERVALO_PREDICCION_S = 0.25
 
-    def __init__(self, fuente_video="0", sin_robot=False):
+    def __init__(self, fuente_video="0", sin_robot=False, rotacion=None):
         self.fuente_video = fuente_video
+        grados = config_robot.ROTACION_CAMARA if rotacion is None else rotacion
+        self.rotacion = self.ROTACIONES[grados]
         # Un número ("0", "1", ...) es el índice de la cámara física;
         # cualquier otra cosa es una ruta a un archivo de video.
         indice = int(fuente_video) if str(fuente_video).isdigit() else fuente_video
@@ -102,7 +110,8 @@ class AplicacionDetector:
                         print("Fin del video.")
                         break
 
-                frame = cv2.rotate(frame, self.ROTACION_CAMARA)
+                if self.rotacion is not None:
+                    frame = cv2.rotate(frame, self.rotacion)
                 panel = self._procesar_frame(frame)
                 cv2.imshow(self.interfaz.nombre_ventana, panel)
 
@@ -157,10 +166,12 @@ class AplicacionDetector:
 
 if __name__ == "__main__":
     import sys
-    # Uso: python main.py [fuente] [--prueba]
-    #   python main.py 2                -> cámara 2, conectado al robot
-    #   python main.py 2 --prueba       -> cámara 2, sin robot
+    # Uso: python main.py [fuente] [--prueba] [--rotar=90]
+    #   python main.py 0 --prueba            -> webcam 0, sin robot
+    #   python main.py 2 --prueba --rotar=90 -> cámara 2 girada 90°, sin robot
+    #   python main.py 2                     -> cámara 2, conectado al robot
     argumentos = [a for a in sys.argv[1:] if not a.startswith("--")]
     sin_robot = "--prueba" in sys.argv
     ruta_video = argumentos[0] if argumentos else "0"
-    AplicacionDetector(fuente_video=ruta_video, sin_robot=sin_robot).ejecutar()
+    rotacion = next((int(a.split("=")[1]) for a in sys.argv if a.startswith("--rotar=")), None)
+    AplicacionDetector(fuente_video=ruta_video, sin_robot=sin_robot, rotacion=rotacion).ejecutar()

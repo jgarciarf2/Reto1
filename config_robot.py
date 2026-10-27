@@ -50,3 +50,8 @@ INTERVALOS_ADELANTE = {
     "ZONA_ESCOLAR": 2.0,
     "VELOCIDAD_60": 0.5,
 }
+
+# Giro del frame de la cámara en grados: 0, 90, -90 o 180. La webcam del
+# computador va en 0; el stream del móvil vertical suele necesitar 90.
+# También se puede probar sin editar: python main.py 2 --rotar=90
+ROTACION_CAMARA = 0
