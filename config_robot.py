@@ -35,3 +35,18 @@ TERMINADOR = ""
 # Intervalo en segundos para enviar señales constantemente al robot (ej: cada 0.1s = 10 veces por seg)
 INTERVALO_REFRESCO_S = 0.3
 
+
+# ------------------------------------------------------------
+# RETO 2: señales por CNN
+# ------------------------------------------------------------
+# Experimento entrenado (carpeta resultados/<EXPERIMENTO_CNN>/). Si no existe
+# todavía, el programa usa el detector por color del reto 1.
+EXPERIMENTO_CNN = "reto2_exp1"
+
+# Cada cuántos segundos se envía "adelante" según la última señal vista:
+# más espaciado = el robot avanza más despacio.
+INTERVALOS_ADELANTE = {
+    "SIGA": 1.0,
+    "ZONA_ESCOLAR": 2.0,
+    "VELOCIDAD_60": 0.5,
+}

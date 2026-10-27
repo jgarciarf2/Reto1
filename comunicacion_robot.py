@@ -85,6 +85,8 @@ class ComunicacionRobot:
         self.ultima_accion = None
         self.ultimo_tiempo_envio = 0
         self.intervalo = getattr(config_robot, "INTERVALO_REFRESCO_S", 0.3)
+        # Cada cuánto se repite ADELANTE; la CNN lo cambia según la señal.
+        self.intervalo_adelante = self.intervalo
 
     def _crear_salida(self):
         if getattr(config_robot, "MAC_BLUETOOTH", None):
@@ -99,7 +101,8 @@ class ComunicacionRobot:
     def enviar(self, accion):
         ahora = time.time()
         # Enviar inmediatamente si cambió la acción, o periódicamente si sigue siendo la misma
-        debe_enviar = (accion != self.ultima_accion) or ((ahora - self.ultimo_tiempo_envio) >= self.intervalo)
+        intervalo = self.intervalo_adelante if accion == Accion.ADELANTE else self.intervalo
+        debe_enviar = (accion != self.ultima_accion) or ((ahora - self.ultimo_tiempo_envio) >= intervalo)
 
         if not debe_enviar:
             return

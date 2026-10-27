@@ -1,3 +1,5 @@
+import time
+
 import cv2
 
 from interfaz_control import InterfazControl
@@ -6,7 +8,7 @@ from clasificador_color import ClasificadorColor
 from detector_senales import DetectorSenales
 from seguidor_linea import SeguidorLinea
 from control_senales import ControlSenales
-from comunicacion_robot import ComunicacionRobot, SalidaConsola
+from comunicacion_robot import Accion, ComunicacionRobot, SalidaConsola
 from visualizador import Visualizador
 
 
@@ -86,7 +88,24 @@ class AplicacionDetector:
         self.detector = DetectorSenales(self.clasificador_color)
         self.seguidor_linea = SeguidorLinea()
         self.control = ControlSenales()
+        self.predictor, self.control_cnn = self._cargar_cnn()
+        self.ultima_prediccion = 0.0
         self.visualizador = Visualizador()
+
+    @staticmethod
+    def _cargar_cnn():
+        """Reto 2: si ya hay un modelo entrenado se usa la CNN; si no, el color del reto 1."""
+        import os
+        import config_robot
+        exp = getattr(config_robot, "EXPERIMENTO_CNN", None)
+        if not exp or not os.path.exists(os.path.join("resultados", exp, "seleccion.json")):
+            print("Sin modelo CNN entrenado: se usa el detector por color.")
+            return None, None
+        from predictor_senales import PredictorSenales
+        from control_cnn import ControlCNN
+        predictor = PredictorSenales(exp)
+        print(f"CNN cargada: {predictor.nombre}")
+        return predictor, ControlCNN()
 
     def ejecutar(self):
         if not self.cap.isOpened():
@@ -130,14 +149,38 @@ class AplicacionDetector:
         salida, accion_linea = self.seguidor_linea.procesar(frame, parametros_linea, salida)
 
         # 3. Decisión final y envío al robot.
-        accion = self.control.actualizar(detecciones, area_roja, accion_linea, parametros_senales)
+        if self.predictor:
+            accion = self._decidir_con_cnn(frame, accion_linea)
+        else:
+            accion = self.control.actualizar(detecciones, area_roja, accion_linea, parametros_senales)
         self.robot.enviar(accion)
 
         self._dibujar_estado(salida, accion)
         return self.visualizador.crear_panel(salida, mascaras["total"])
 
+    def _decidir_con_cnn(self, frame, accion_linea):
+        # La CNN es la parte pesada: se consulta ~4 veces por segundo, no en cada frame.
+        ahora = time.time()
+        if ahora - self.ultima_prediccion >= 0.25:
+            self.ultima_prediccion = ahora
+            clase, prob = self.predictor.predecir(frame)
+            self.control_cnn.actualizar(clase, prob, ahora)
+            self.ultimo_texto_cnn = f"CNN: {clase} {prob * 100:.0f}%"
+        self.robot.intervalo_adelante = self.control_cnn.intervalo_adelante
+        if self.control_cnn.detenido:
+            return Accion.PARAR
+        return accion_linea
+
     def _dibujar_estado(self, salida, accion):
-        estado = self.control.estado
+        if self.predictor:
+            estado = ControlSenales.DETENIDO if self.control_cnn.detenido else ControlSenales.SIGUIENDO
+            texto = getattr(self, "ultimo_texto_cnn", "CNN...")
+            cv2.putText(salida, texto, (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.8,
+                        (0, 0, 0), 4, cv2.LINE_AA)
+            cv2.putText(salida, texto, (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.8,
+                        (255, 255, 0), 2, cv2.LINE_AA)
+        else:
+            estado = self.control.estado
         texto = f"{estado} -> {accion}"
         y = salida.shape[0] - 20
         cv2.putText(salida, texto, (10, y), cv2.FONT_HERSHEY_SIMPLEX, 0.9,
