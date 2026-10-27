@@ -1,3 +1,0 @@
-modelo,experimento,max_epochs,epoca_parada,mejor_epoca,train_loss,val_loss,accuracy,f1_ponderado,f1_macro,precision_macro,recall_macro,grafica_perdida,grafica_confusion,archivo_reporte
-MobileNet,reto2_exp1,30,30,30,0.3458895683288574,0.45629024505615234,0.7,0.7047619047619048,0.7095238095238094,0.7916666666666666,0.7083333333333333,perdida_MobileNet.png,matriz_confusion_MobileNet.png,reporte_clasificacion_MobileNet.txt
-VGG16,reto2_exp1,30,9,4,3.961901903152466,2.01729154586792,0.4,0.33095238095238094,0.35119047619047616,0.4125,0.4583333333333333,perdida_VGG16.png,matriz_confusion_VGG16.png,reporte_clasificacion_VGG16.txt
