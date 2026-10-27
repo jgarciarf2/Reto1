@@ -51,7 +51,11 @@ class ControlCNN:
             self._candidata = clase if confiable else None
             self._repeticiones = 1 if confiable else 0
 
-        if self._repeticiones >= self.confirmaciones:
+        if self._repeticiones >= self.confirmaciones and clase == "SIN_SENAL":
+            # La red ve la pista vacía: se suelta el PARE y la próxima señal cuenta como nueva
+            self.detenido = False
+            self._ultima_confirmada = None
+        elif self._repeticiones >= self.confirmaciones:
             if clase != self._ultima_confirmada:
                 nueva = self._ultima_confirmada = clase
             if clase == "PARE":

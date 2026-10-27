@@ -32,6 +32,23 @@ class PredictorSenales:
             os.path.join(carpeta, self.nombre, f"{self.nombre}.keras"))
         self.modelo(np.zeros((1,) + self.img_size + (3,), np.float32))  # calentamiento
 
+    @staticmethod
+    def _recorte_proporcion(foto):
+        """
+        Las fotos de entrenamiento son 3:4 (vertical) o 4:3 (apaisada). Un frame
+        16:9 del iPhone se recorta al centro con esa proporción para que no se
+        deforme distinto al aplastarlo a 224x224.
+        """
+        alto, ancho = foto.shape[:2]
+        proporcion = 3 / 4 if alto >= ancho else 4 / 3  # ancho / alto
+        if ancho / alto > proporcion:
+            nuevo = int(alto * proporcion)
+            x = (ancho - nuevo) // 2
+            return foto[:, x:x + nuevo]
+        nuevo = int(ancho / proporcion)
+        y = (alto - nuevo) // 2
+        return foto[y:y + nuevo, :]
+
     def predecir(self, foto):
         """Devuelve (clase, probabilidad). `foto` es una ruta o un frame BGR."""
         if isinstance(foto, str):
@@ -39,6 +56,7 @@ class PredictorSenales:
             foto = cv2.imread(foto, cv2.IMREAD_IGNORE_ORIENTATION | cv2.IMREAD_COLOR)
             if foto is None:
                 raise FileNotFoundError("No se pudo leer la imagen.")
+        foto = self._recorte_proporcion(foto)
         rgb = cv2.cvtColor(foto, cv2.COLOR_BGR2RGB)
         rgb = cv2.resize(rgb, self.img_size[::-1]).astype(np.float32)
         probs = self.modelo(self._preprocesar(rgb[None]), training=False).numpy()[0]
