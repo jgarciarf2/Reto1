@@ -67,6 +67,7 @@ class AplicacionDetector:
         # Un número ("0", "1", ...) es el índice de la cámara física;
         # cualquier otra cosa es una ruta a un archivo de video.
         indice = int(fuente_video) if str(fuente_video).isdigit() else fuente_video
+        self.es_camara = isinstance(indice, int) or str(indice).startswith("http")
 
         experimento = config_robot.EXPERIMENTO_CNN
         if not os.path.exists(os.path.join("resultados", experimento, "seleccion.json")):
@@ -100,15 +101,10 @@ class AplicacionDetector:
 
         try:
             while True:
-                ret, frame = self.cap.read()
-
+                ret, frame = self._leer_frame()
                 if not ret:
-                    # Si finaliza el video, reiniciar al inicio para bucle
-                    self.cap.set(cv2.CAP_PROP_POS_FRAMES, 0)
-                    ret, frame = self.cap.read()
-                    if not ret:
-                        print("Fin del video.")
-                        break
+                    print("No llegan imágenes de la cámara/video.")
+                    break
 
                 if self.rotacion is not None:
                     frame = cv2.rotate(frame, self.rotacion)
@@ -121,6 +117,24 @@ class AplicacionDetector:
             self.robot.cerrar()
             self.cap.release()
             cv2.destroyAllWindows()
+
+    def _leer_frame(self):
+        ret, frame = self.cap.read()
+        if ret:
+            return ret, frame
+
+        if self.es_camara:
+            # Una cámara (sobre todo el iPhone) tarda en arrancar: se espera hasta ~5 s.
+            for _ in range(50):
+                time.sleep(0.1)
+                ret, frame = self.cap.read()
+                if ret:
+                    return ret, frame
+            return False, None
+
+        # Si finaliza el video, reiniciar al inicio para bucle
+        self.cap.set(cv2.CAP_PROP_POS_FRAMES, 0)
+        return self.cap.read()
 
     def _procesar_frame(self, frame):
         # 1. Línea: acción propuesta por el seguidor.
