@@ -75,7 +75,7 @@ class AplicacionDetector:
                 f"No hay modelo entrenado en resultados/{experimento}/. "
                 "Entrena con: .venv/bin/python entrenar.py " + experimento)
         self.predictor = PredictorSenales(experimento)
-        self.control_cnn = ControlCNN()
+        self.control_cnn = ControlCNN(confianza_minima=config_robot.CONFIANZA_MINIMA)
 
         # Primero el robot: conectarse por Bluetooth puede tardar
         # varios segundos, y si las ventanas ya estuvieran abiertas
@@ -93,6 +93,7 @@ class AplicacionDetector:
         self.visualizador = Visualizador()
         self.ultima_prediccion = 0.0
         self.texto_cnn = "CNN..."
+        self.lineas_probs = []
 
     def _abrir_camara(self, indice):
         cap = cv2.VideoCapture(indice)
@@ -171,6 +172,8 @@ class AplicacionDetector:
         self.ultima_prediccion = ahora
         clase, prob = self.predictor.predecir(frame)
         self.texto_cnn = f"CNN: {clase} {prob * 100:.0f}%"
+        self.lineas_probs = [f"{c} {p * 100:.0f}%"
+                             for c, p in zip(self.predictor.clases, self.predictor.ultimas_probs)]
         nueva = self.control_cnn.actualizar(clase, prob, ahora)
         if nueva:
             print(nueva)  # única salida por terminal: la señal detectada
@@ -180,6 +183,14 @@ class AplicacionDetector:
                     (0, 0, 0), 4, cv2.LINE_AA)
         cv2.putText(salida, self.texto_cnn, (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.8,
                     (255, 255, 0), 2, cv2.LINE_AA)
+
+        # Probabilidad de cada clase (sirve para ver si SIGA/ZONA se acercan al umbral)
+        for i, linea in enumerate(self.lineas_probs):
+            y_linea = 60 + i * 28
+            cv2.putText(salida, linea, (10, y_linea), cv2.FONT_HERSHEY_SIMPLEX, 0.7,
+                        (0, 0, 0), 4, cv2.LINE_AA)
+            cv2.putText(salida, linea, (10, y_linea), cv2.FONT_HERSHEY_SIMPLEX, 0.7,
+                        (255, 255, 255), 2, cv2.LINE_AA)
 
         detenido = self.control_cnn.detenido
         texto = f"{'DETENIDO' if detenido else 'SIGUIENDO'} -> {accion}"

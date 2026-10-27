@@ -55,3 +55,7 @@ INTERVALOS_ADELANTE = {
 # computador va en 0; el stream del móvil vertical suele necesitar 90.
 # También se puede probar sin editar: python main.py 2 --rotar=90
 ROTACION_CAMARA = 0
+
+# Probabilidad mínima (0 a 1) para que la CNN cuente una señal. Más baja =
+# reconoce más fácil pero se equivoca más. Mira el % en pantalla para ajustarla.
+CONFIANZA_MINIMA = 0.85

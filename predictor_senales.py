@@ -43,6 +43,7 @@ class PredictorSenales:
         rgb = cv2.resize(rgb, self.img_size[::-1]).astype(np.float32)
         probs = self.modelo(self._preprocesar(rgb[None]), training=False).numpy()[0]
         i = int(np.argmax(probs))
+        self.ultimas_probs = probs  # las 4 probabilidades, para depurar en pantalla
         return self.clases[i], float(probs[i])
 
 
