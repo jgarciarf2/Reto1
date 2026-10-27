@@ -60,7 +60,7 @@ class AplicacionDetector:
     # La CNN es la parte pesada: se consulta ~4 veces por segundo, no en cada frame.
     INTERVALO_PREDICCION_S = 0.25
 
-    def __init__(self, fuente_video="0", sin_robot=False, rotacion=None):
+    def __init__(self, fuente_video="0", sin_robot=False, rotacion=None, confianza=None):
         self.fuente_video = fuente_video
         grados = config_robot.ROTACION_CAMARA if rotacion is None else rotacion
         self.rotacion = self.ROTACIONES[grados]
@@ -75,7 +75,8 @@ class AplicacionDetector:
                 f"No hay modelo entrenado en resultados/{experimento}/. "
                 "Entrena con: .venv/bin/python entrenar.py " + experimento)
         self.predictor = PredictorSenales(experimento)
-        self.control_cnn = ControlCNN(confianza_minima=config_robot.CONFIANZA_MINIMA)
+        self.control_cnn = ControlCNN(
+            confianza_minima=config_robot.CONFIANZA_MINIMA if confianza is None else confianza)
 
         # Primero el robot: conectarse por Bluetooth puede tardar
         # varios segundos, y si las ventanas ya estuvieran abiertas
@@ -203,7 +204,7 @@ class AplicacionDetector:
 
 if __name__ == "__main__":
     import sys
-    # Uso: python main.py [fuente] [--prueba] [--rotar=90]
+    # Uso: python main.py [fuente] [--prueba] [--rotar=90] [--confianza=0.6]
     #   python main.py 0 --prueba            -> webcam 0, sin robot
     #   python main.py 2 --prueba --rotar=90 -> cámara 2 girada 90°, sin robot
     #   python main.py 2                     -> cámara 2, conectado al robot
@@ -211,4 +212,6 @@ if __name__ == "__main__":
     sin_robot = "--prueba" in sys.argv
     ruta_video = argumentos[0] if argumentos else "0"
     rotacion = next((int(a.split("=")[1]) for a in sys.argv if a.startswith("--rotar=")), None)
-    AplicacionDetector(fuente_video=ruta_video, sin_robot=sin_robot, rotacion=rotacion).ejecutar()
+    confianza = next((float(a.split("=")[1]) for a in sys.argv if a.startswith("--confianza=")), None)
+    AplicacionDetector(fuente_video=ruta_video, sin_robot=sin_robot,
+                       rotacion=rotacion, confianza=confianza).ejecutar()
