@@ -86,13 +86,25 @@ class AplicacionDetector:
         else:
             self.robot = ComunicacionRobot()
 
-        self.cap = cv2.VideoCapture(indice)
+        self.cap = self._abrir_camara(indice)
 
         self.interfaz = InterfazControl()
         self.seguidor_linea = SeguidorLinea()
         self.visualizador = Visualizador()
         self.ultima_prediccion = 0.0
         self.texto_cnn = "CNN..."
+
+    def _abrir_camara(self, indice):
+        cap = cv2.VideoCapture(indice)
+        if self.es_camara and not cap.isOpened():
+            # El iPhone (Cámara de continuidad) puede tardar en aparecer: se reintenta ~15 s.
+            print("Esperando la cámara... (desbloquea el iPhone y acércalo al Mac)")
+            for _ in range(15):
+                time.sleep(1)
+                cap = cv2.VideoCapture(indice)
+                if cap.isOpened():
+                    break
+        return cap
 
     def ejecutar(self):
         if not self.cap.isOpened():
