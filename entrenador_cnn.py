@@ -27,7 +27,7 @@ class CNNTrainer:
     def __init__(self, dataset_dir, img_size=(224, 224), batch_size=32,
                  val_split=0.2, test_split=0.1, patience=5, max_epochs=100,
                  learning_rate=1e-3, seed=42, output_dir="resultados",
-                 experimento="experimento_1"):
+                 experimento="reto2"):
         self.dataset_dir = dataset_dir
         self.img_size = img_size
         self.batch_size = batch_size
@@ -39,7 +39,7 @@ class CNNTrainer:
         self.seed = seed
         self.output_dir = output_dir
         self.experimento = experimento
-        self.exp_dir = os.path.join(self.output_dir, self.experimento)
+        self.exp_dir = self.output_dir  # modelos directo en resultados/<modelo>/
         self.historiales = {}
         os.makedirs(self.exp_dir, exist_ok=True)
         self._cargar_datos()
@@ -165,7 +165,7 @@ class CNNTrainer:
         epocas = len(hist.history["loss"])
         mejor = int(np.argmin(hist.history["val_loss"])) + 1
 
-        # Carpeta específica para este modelo: resultados/experimento/nombremodelo
+        # Carpeta específica para este modelo: resultados/<nombremodelo>
         model_dir = os.path.join(self.exp_dir, nombre)
         os.makedirs(model_dir, exist_ok=True)
 

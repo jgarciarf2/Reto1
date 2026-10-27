@@ -3,14 +3,14 @@ import sys
 from entrenador_cnn import CNNTrainer
 from modelos_cnn import IMG_SIZE
 
-# Uso: python entrenar.py [experimento] [Modelo1 Modelo2 ...]
-nombre_exp = sys.argv[1] if len(sys.argv) > 1 else "reto2_exp1"
-modelos = sys.argv[2:] or ["MobileNet", "VGG16", "ResNet50", "DenseNet121"]
+# Uso: python entrenar.py [Modelo1 Modelo2 ...]
+# Los modelos quedan en resultados/<Modelo>/ (se sobrescriben en cada corrida).
+modelos = sys.argv[1:] or ["MobileNet", "VGG16", "ResNet50", "DenseNet121"]
 
 trainer = CNNTrainer(
-    dataset_dir="5_cnns/dataset",  # 0=PARE, 1=SIGA, 2=VELOCIDAD_60, 3=ZONA_ESCOLAR
+    dataset_dir="5_cnns/dataset",  # 0=PARE, 1=SIGA, 2=VELOCIDAD_60, 3=ZONA_ESCOLAR, 4=SIN_SENAL
     output_dir="resultados",
-    experimento=nombre_exp,
+    experimento="reto2",
     max_epochs=30,
     patience=5,
     batch_size=32,

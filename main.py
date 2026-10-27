@@ -69,12 +69,11 @@ class AplicacionDetector:
         indice = int(fuente_video) if str(fuente_video).isdigit() else fuente_video
         self.es_camara = isinstance(indice, int) or str(indice).startswith("http")
 
-        experimento = config_robot.EXPERIMENTO_CNN
-        if not os.path.exists(os.path.join("resultados", experimento, "seleccion.json")):
+        if not os.path.exists(os.path.join("resultados", "seleccion.json")):
             raise SystemExit(
-                f"No hay modelo entrenado en resultados/{experimento}/. "
-                "Entrena con: .venv/bin/python entrenar.py " + experimento)
-        self.predictor = PredictorSenales(experimento)
+                "No hay modelo entrenado en resultados/. "
+                "Entrena con: .venv/bin/python entrenar.py")
+        self.predictor = PredictorSenales()
         self.control_cnn = ControlCNN(
             confianza_minima=config_robot.CONFIANZA_MINIMA if confianza is None else confianza)
 

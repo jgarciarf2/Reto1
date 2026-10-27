@@ -14,12 +14,11 @@ class PredictorSenales:
     de una foto. Por defecto usa el mejor modelo de seleccion.json (el de
     menor val_loss); se puede forzar otro con `modelo="VGG16"`, etc.
 
-        predictor = PredictorSenales("reto2_exp1")
+        predictor = PredictorSenales()
         clase, prob = predictor.predecir("foto.jpg")   # o un frame de OpenCV (BGR)
     """
 
-    def __init__(self, experimento="reto2_exp1", modelo=None, output_dir="resultados"):
-        carpeta = os.path.join(output_dir, experimento)
+    def __init__(self, modelo=None, carpeta="resultados"):
         with open(os.path.join(carpeta, "seleccion.json"), encoding="utf-8") as f:
             seleccion = json.load(f)
 
@@ -66,7 +65,6 @@ class PredictorSenales:
 
 if __name__ == "__main__":
     import sys
-    experimento = sys.argv[2] if len(sys.argv) > 2 else "reto2_exp1"
-    p = PredictorSenales(experimento)
+    p = PredictorSenales()
     clase, prob = p.predecir(sys.argv[1])
     print(f"[{p.nombre}] {clase} ({prob * 100:.1f}%)")

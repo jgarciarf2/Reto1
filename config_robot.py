@@ -39,9 +39,8 @@ INTERVALO_REFRESCO_S = 0.3
 # ------------------------------------------------------------
 # RETO 2: señales por CNN
 # ------------------------------------------------------------
-# Experimento entrenado (carpeta resultados/<EXPERIMENTO_CNN>/). main.py usa el
-# mejor modelo de su seleccion.json.
-EXPERIMENTO_CNN = "reto2_exp2"
+# main.py usa el mejor modelo que indica resultados/seleccion.json (lo deja
+# entrenar.py). Los modelos están en resultados/<Modelo>/<Modelo>.keras.
 
 # Cada cuántos segundos se envía "adelante" según la última señal vista:
 # más espaciado = el robot avanza más despacio.
