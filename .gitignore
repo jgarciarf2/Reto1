@@ -186,3 +186,6 @@ pyvenv.cfg
 pip-selfcheck.json
 
 # End of https://www.toptal.com/developers/gitignore/api/python,venv
+# Apuntes de clase y archivos del sistema
+5_cnns/
+.DS_Store

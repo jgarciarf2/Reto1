@@ -90,24 +90,6 @@ class DetectorSenales:
         if self._toca_borde(contorno, forma_frame[1], limite_roi):
             return None, None
 
-        # 1. Filtro de solidez (Área del contorno / Área de su envolvente convexa)
-        # Una figura sólida geométrica da solidez > 0.82; pilas o manos dan valores mucho menores.
-        envolvente = cv2.convexHull(contorno)
-        area_envolvente = cv2.contourArea(envolvente)
-        if area_envolvente == 0:
-            return None
-        solidez = float(area) / area_envolvente
-        if solidez < 0.80:
-            return None
-
-        # 2. Filtro de relación de aspecto (bounding box)
-        # Descarta cables o franjas alargadas (diapositiva 25: cv2.boundingRect)
-        x, y, w, h = cv2.boundingRect(contorno)
-        aspect_ratio = float(w) / h
-        if aspect_ratio < 0.5 or aspect_ratio > 2.0:
-            return None
-
-        # 3. Aproximación poligonal (diapositivas 23-24: cv2.approxPolyDP)
         perimetro = cv2.arcLength(contorno, True)
         epsilon = (parametros["precision"] / 100) * perimetro
         aproximacion = cv2.approxPolyDP(contorno, epsilon, True)

@@ -87,4 +87,3 @@ class Preprocesador:
             cv2.CHAIN_APPROX_SIMPLE
         )
         return contornos
-
