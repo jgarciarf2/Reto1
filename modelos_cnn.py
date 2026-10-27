@@ -11,8 +11,8 @@ MODELOS = {
 }
 
 # Clases del reto 2: el índice es el número de la carpeta en dataset/
-# (0=PARE, 1=SIGA, 2=ZONA_ESCOLAR, 3=VELOCIDAD_60).
-CLASES = ["PARE", "SIGA", "ZONA_ESCOLAR", "VELOCIDAD_60"]
+# (0=PARE, 1=SIGA, 2=VELOCIDAD_60, 3=ZONA_ESCOLAR, la amarilla de paso).
+CLASES = ["PARE", "SIGA", "VELOCIDAD_60", "ZONA_ESCOLAR"]
 
 # Resolución de entrada de las CNN (la de los apuntes de clase).
 IMG_SIZE = (224, 224)

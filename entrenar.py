@@ -8,7 +8,7 @@ nombre_exp = sys.argv[1] if len(sys.argv) > 1 else "reto2_exp1"
 modelos = sys.argv[2:] or ["MobileNet", "VGG16", "ResNet50", "DenseNet121"]
 
 trainer = CNNTrainer(
-    dataset_dir="dataset",       # carpetas 0, 1, 2, 3 con las fotos de cada señal
+    dataset_dir="5_cnns/dataset",  # 0=PARE, 1=SIGA, 2=VELOCIDAD_60, 3=ZONA_ESCOLAR
     output_dir="resultados",
     experimento=nombre_exp,
     max_epochs=10,

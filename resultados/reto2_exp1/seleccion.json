@@ -1,0 +1,27 @@
+{
+  "experimento": "reto2_exp1",
+  "clases": [
+    "0",
+    "1",
+    "2",
+    "3"
+  ],
+  "img_size": [
+    224,
+    224
+  ],
+  "mejores": [
+    {
+      "modelo": "ResNet50",
+      "val_loss": 0.6936032176017761,
+      "accuracy": 0.8,
+      "f1_macro": 0.7916666666666666
+    },
+    {
+      "modelo": "DenseNet121",
+      "val_loss": 0.9329096674919128,
+      "accuracy": 0.6,
+      "f1_macro": 0.5428571428571429
+    }
+  ]
+}
