@@ -1,0 +1,17 @@
+Experimento: reto2
+Modelo: VGG16
+Épocas totales entrenadas: 30
+Mejor época seleccionada: 28
+============================================================
+
+              precision    recall  f1-score   support
+
+           0     0.9091    0.7143    0.8000        14
+           1     0.8947    0.8947    0.8947        19
+           2     0.8095    1.0000    0.8947        17
+           3     0.8824    0.8824    0.8824        17
+           4     1.0000    0.8571    0.9231         7
+
+    accuracy                         0.8784        74
+   macro avg     0.8991    0.8697    0.8790        74
+weighted avg     0.8850    0.8784    0.8766        74
