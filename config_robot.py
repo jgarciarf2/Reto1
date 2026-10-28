@@ -44,10 +44,11 @@ INTERVALO_REFRESCO_S = 0.3
 
 # Cada cuántos segundos se envía "adelante" según la última señal vista:
 # más espaciado = el robot avanza más despacio.
+# SIGA es también la velocidad con la que arranca el robot antes de ver señales.
 INTERVALOS_ADELANTE = {
-    "SIGA": 1.0,
-    "ZONA_ESCOLAR": 2.0,
-    "VELOCIDAD_60": 0.5,
+    "SIGA": 0.4,
+    "ZONA_ESCOLAR": 1.0,
+    "VELOCIDAD_60": 0.15,
 }
 
 # Giro del frame de la cámara en grados: 0, 90, -90 o 180. Con el iPhone sobre
