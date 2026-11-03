@@ -106,6 +106,59 @@ Frenar es más exigente que seguir frenado. Para entrar a DETENIDO hace falta un
 - Si el profesor pone la tarjeta muy cerca de la cámara o pegada al borde de la imagen, la forma no se puede confirmar y el robot no frena hasta que la tarjeta quede entera a la vista.
 - Las letras y el puerto del robot todavía son provisionales.
 
+## Reto 2: cuatro señales con CNN
+
+Las señales (PARE, SIGA, ZONA ESCOLAR y VELOCIDAD 60) las reconoce una CNN de clase entrenada con `entrenar.py`. El seguimiento de línea sigue siendo el del reto 1, que el enunciado permite conservar.
+
+### Cómo correrlo con el robot
+
+```bash
+py -3.13 -m venv .venv           # TensorFlow todavía no soporta Python 3.14
+.venv\Scripts\activate
+pip install -r requirements.txt
+
+python main.py 2 --prueba        # cámara 2, sin robot (no envía nada)
+python main.py 2                 # cámara 2, conectado al mBot por Bluetooth
+python probar_videos.py          # prueba la CNN y el control sobre el video de la pista
+python -m unittest test_control_cnn
+```
+
+**Modelo.** `main.py` usa la primera carpeta de `config_robot.CARPETAS_MODELO` que tenga `seleccion.json` y el `.keras` del mejor modelo. Los `.keras` no se suben a git: en cada computador hay que entrenar (`python entrenar.py`) o copiar la carpeta de resultados. El modelo puede tener 4 salidas o 5 (con `SIN_SENAL`); el predictor lo detecta solo.
+
+**Cámara.** `ROTACION_CAMARA` gira el frame para el seguidor de línea (robot abajo, pista hacia arriba). La CNN recibe el frame **sin girar** (`CNN_SIN_ROTAR = True`). En el video de prueba, al girarlo -90° se pierden la ZONA ESCOLAR y el SIGA final, y el robot quedaría detenido para siempre.
+
+### Comportamiento (`control_cnn.py`)
+
+| Señal | Qué hace el robot |
+| ----- | ----------------- |
+| PARE | Se detiene y sigue detenido **hasta ver SIGA** |
+| SIGA | Arranca si estaba detenido; si no, sigue igual |
+| ZONA ESCOLAR | Baja a velocidad REDUCIDA; no lo saca de un PARE |
+| VELOCIDAD 60 | Vuelve a velocidad NORMAL (si ya iba normal, la conserva); no lo saca de un PARE |
+| SIN_SENAL | Nada (solo si el modelo tiene esa clase) |
+
+`detenido` y `velocidad` son independientes. Si el robot está detenido por PARE y ve la zona escolar, sigue quieto, y cuando ve SIGA arranca despacio.
+
+### Velocidad (`config_robot.VELOCIDADES`)
+
+| Velocidad | "adelante" cada | "parar" después de |
+| --------- | --------------- | ------------------ |
+| NORMAL | 0.4 s | — |
+| REDUCIDA | 1.0 s | 0.35 s |
+
+En REDUCIDA, después de cada "adelante" se manda "parar". Así el robot frena aunque el mBot siga de largo con un solo `w`. Los giros no se tocan, para no perder la línea. Si el cambio no se nota en la pista, sube `intervalo_s` o baja `avance_s` de REDUCIDA.
+
+### Cuándo obedece una señal
+
+La CNN se consulta cada 0.2 s y siempre responde alguna clase. Con la pista vacía tiende a decir SIGA con 40-80 %. Para no reaccionar a eso:
+- se promedian las 2 últimas predicciones (`VENTANA_CNN`);
+- cada señal tiene su propio umbral (`CONFIANZA_MINIMA`): PARE y SIGA 0.90, porque equivocarse es caro, y ZONA 0.60 y 60 0.75, porque solo cambian la velocidad;
+- la señal se obedece tras 3 predicciones seguidas (`CONFIRMACIONES_CNN`), unos 0.6-0.8 s.
+
+Con `--confianza=0.7` se prueba un umbral único para todas, sin editar el archivo.
+
+En el video `5_cnns/dataset/WhatsApp Video ... 11.26.30 AM.mp4`, que no se usó para entrenar, el control obedece 60 → SIGA → 60 → PARE → ZONA → ZONA → SIGA sin señales falsas en los tramos vacíos. Solo pierde un SIGA que aparece cortado en el borde. Los umbrales se ajustaron con ese mismo video, así que conviene confirmarlos en la pista.
+
 ## Comparación con otros equipos
 
 _Pendiente: completar después de la socialización en clase._

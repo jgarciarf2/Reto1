@@ -21,14 +21,25 @@ class InterfazControl:
         self.nombre_ventana = nombre_ventana
         self.nombre_ventana_controles_linea = "Controles - Linea"
 
-        cv2.namedWindow(self.nombre_ventana, cv2.WINDOW_NORMAL)
+        # KEEPRATIO: al agrandar la ventana la imagen no se estira ni se aplasta
+        cv2.namedWindow(self.nombre_ventana, cv2.WINDOW_NORMAL | cv2.WINDOW_KEEPRATIO)
         cv2.namedWindow(self.nombre_ventana_controles_linea, cv2.WINDOW_NORMAL)
 
-        cv2.resizeWindow(self.nombre_ventana, 720, 640)
+        # Tamaño inicial vertical (como el móvil); main.py la ajusta al primer frame
+        cv2.resizeWindow(self.nombre_ventana, 405, 720)
         cv2.resizeWindow(self.nombre_ventana_controles_linea, 420, 480)
+        self._ventana_ajustada = False
 
         self._crear_trackbars_linea()
         self._imprimir_leyenda()
+
+    def mostrar(self, panel):
+        """Muestra el panel; la primera vez ajusta la ventana a su proporción (vertical u horizontal)."""
+        if not self._ventana_ajustada:
+            alto, ancho = panel.shape[:2]
+            cv2.resizeWindow(self.nombre_ventana, ancho, alto)
+            self._ventana_ajustada = True
+        cv2.imshow(self.nombre_ventana, panel)
 
     def _nada(self, valor):
         # Callback vacío que exige la API de trackbars de OpenCV

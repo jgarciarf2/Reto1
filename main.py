@@ -1,4 +1,3 @@
-import os
 import time
 
 import cv2
@@ -6,6 +5,7 @@ import cv2
 import config_robot
 from comunicacion_robot import Accion, ComunicacionRobot, SalidaConsola
 from control_cnn import ControlCNN
+from hilos import CamaraEnVivo, HiloCNN
 from interfaz_control import InterfazControl
 from predictor_senales import PredictorSenales
 from seguidor_linea import SeguidorLinea
@@ -24,10 +24,12 @@ from visualizador import Visualizador
 #   PredictorSenales  -> la CNN entrenada (reto 2) mira el frame y
 #                         dice qué señal ve: PARE, SIGA,
 #                         VELOCIDAD_60 o ZONA_ESCOLAR.
-#   ControlCNN        -> confirma la señal (varias predicciones
-#                         seguidas) y decide: PARE detiene al robot;
-#                         las demás cambian cada cuánto se envía
-#                         "adelante" (más espaciado = más lento).
+#   ControlCNN        -> confirma la señal (promedio de varias
+#                         predicciones) y decide: PARE detiene al
+#                         robot hasta ver SIGA; ZONA_ESCOLAR baja a
+#                         velocidad REDUCIDA y VELOCIDAD_60 vuelve a
+#                         la NORMAL (ninguna de las dos saca al robot
+#                         de un PARE).
 #   ComunicacionRobot -> traduce la acción a la letra que
 #                         entiende el robot (config_robot.py) y
 #                         la envía.
@@ -57,8 +59,8 @@ class AplicacionDetector:
         -90: cv2.ROTATE_90_COUNTERCLOCKWISE,
         180: cv2.ROTATE_180,
     }
-    # La CNN es la parte pesada: se consulta ~4 veces por segundo, no en cada frame.
-    INTERVALO_PREDICCION_S = 0.25
+    # La CNN es la parte pesada: se consulta cada INTERVALO_CNN_S, no en cada frame.
+    INTERVALO_PREDICCION_S = config_robot.INTERVALO_CNN_S
 
     def __init__(self, fuente_video="0", sin_robot=False, rotacion=None, confianza=None):
         self.fuente_video = fuente_video
@@ -69,13 +71,13 @@ class AplicacionDetector:
         indice = int(fuente_video) if str(fuente_video).isdigit() else fuente_video
         self.es_camara = isinstance(indice, int) or str(indice).startswith("http")
 
-        if not os.path.exists(os.path.join("resultados", "seleccion.json")):
-            raise SystemExit(
-                "No hay modelo entrenado en resultados/. "
-                "Entrena con: .venv/bin/python entrenar.py")
-        self.predictor = PredictorSenales()
-        self.control_cnn = ControlCNN(
-            confianza_minima=config_robot.CONFIANZA_MINIMA if confianza is None else confianza)
+        try:
+            self.predictor = PredictorSenales()
+        except FileNotFoundError as e:
+            raise SystemExit(str(e))
+        print(f"CNN cargada: {self.predictor.nombre} ({self.predictor.carpeta}), "
+              f"clases {self.predictor.clases}")
+        self.control_cnn = ControlCNN(confianza_minima=confianza)
 
         # Primero el robot: conectarse por Bluetooth puede tardar
         # varios segundos, y si las ventanas ya estuvieran abiertas
@@ -94,6 +96,8 @@ class AplicacionDetector:
         self.ultima_prediccion = 0.0
         self.texto_cnn = "CNN..."
         self.lineas_probs = []
+        self.hilo_cnn = None  # se crea en ejecutar(); sin él la CNN corre en el loop
+        self.fps = 0.0
 
     def _abrir_camara(self, indice):
         cap = cv2.VideoCapture(indice)
@@ -112,6 +116,16 @@ class AplicacionDetector:
             print(f"No se pudo abrir el video/camara: {self.fuente_video}")
             return
 
+        # En paralelo (ver hilos.py): la cámara se lee en su propio hilo
+        # (siempre el frame más nuevo, sin atraso) y la CNN corre en otro.
+        if self.es_camara:
+            self.cap = CamaraEnVivo(self.cap)
+        self.hilo_cnn = HiloCNN(self.predictor, self.control_cnn,
+                                self.INTERVALO_PREDICCION_S, self._avisar_senal)
+        # Un archivo de video se reproduce a su velocidad; la cámara, lo más rápido posible
+        espera_ms = 1 if self.es_camara else 30
+        inicio_fps, frames_fps = time.time(), 0
+
         try:
             while True:
                 ret, frame = self._leer_frame()
@@ -119,47 +133,55 @@ class AplicacionDetector:
                     print("No llegan imágenes de la cámara/video.")
                     break
 
+                # El seguidor de línea necesita el robot abajo (frame girado);
+                # la CNN funciona mejor con el frame tal como sale de la cámara.
+                frame_cnn = frame
                 if self.rotacion is not None:
                     frame = cv2.rotate(frame, self.rotacion)
-                panel = self._procesar_frame(frame)
-                cv2.imshow(self.interfaz.nombre_ventana, panel)
+                panel = self._procesar_frame(frame, frame_cnn)
+                self.interfaz.mostrar(panel)
 
-                if cv2.waitKey(30) & 0xFF == ord("q"):
+                frames_fps += 1
+                if time.time() - inicio_fps >= 1.0:
+                    self.fps = frames_fps / (time.time() - inicio_fps)
+                    inicio_fps, frames_fps = time.time(), 0
+
+                if cv2.waitKey(espera_ms) & 0xFF == ord("q"):
                     break
         finally:
+            self.hilo_cnn.detener()
             self.robot.cerrar()
             self.cap.release()
             cv2.destroyAllWindows()
 
     def _leer_frame(self):
+        if self.es_camara:
+            # CamaraEnVivo ya espera hasta ~5 s si la cámara tarda en arrancar
+            return self.cap.read()
+
         ret, frame = self.cap.read()
         if ret:
             return ret, frame
-
-        if self.es_camara:
-            # Una cámara (sobre todo el iPhone) tarda en arrancar: se espera hasta ~5 s.
-            for _ in range(50):
-                time.sleep(0.1)
-                ret, frame = self.cap.read()
-                if ret:
-                    return ret, frame
-            return False, None
 
         # Si finaliza el video, reiniciar al inicio para bucle
         self.cap.set(cv2.CAP_PROP_POS_FRAMES, 0)
         return self.cap.read()
 
-    def _procesar_frame(self, frame):
+    def _procesar_frame(self, frame, frame_cnn=None):
         # 1. Línea: acción propuesta por el seguidor.
         salida, accion_linea = self.seguidor_linea.procesar(
             frame, self.interfaz.leer_controles_linea())
 
         # 2. Señal: la CNN decide si hay que parar o cambiar la velocidad.
-        self._consultar_cnn(frame)
+        frame_cnn = frame if frame_cnn is None or not config_robot.CNN_SIN_ROTAR else frame_cnn
+        if self.hilo_cnn:
+            self.hilo_cnn.ver(frame_cnn)  # la CNN lo procesa en su hilo
+        else:
+            self._consultar_cnn(frame_cnn)
 
         # 3. Decisión final y envío al robot.
         accion = Accion.PARAR if self.control_cnn.detenido else accion_linea
-        self.robot.intervalo_adelante = self.control_cnn.intervalo_adelante
+        self.robot.velocidad = self.control_cnn.velocidad
         self.robot.enviar(accion)
 
         self._dibujar_estado(salida, accion)
@@ -170,35 +192,52 @@ class AplicacionDetector:
         if ahora - self.ultima_prediccion < self.INTERVALO_PREDICCION_S:
             return
         self.ultima_prediccion = ahora
-        clase, prob = self.predictor.predecir(frame)
-        self.texto_cnn = f"CNN: {clase} {prob * 100:.0f}%"
-        self.lineas_probs = [f"{c} {p * 100:.0f}%"
-                             for c, p in zip(self.predictor.clases, self.predictor.ultimas_probs)]
-        nueva = self.control_cnn.actualizar(clase, prob, ahora)
+        probs = self.predictor.probabilidades(frame)
+        clase = max(probs, key=probs.get)
+        self.texto_cnn = f"CNN: {clase} {probs[clase] * 100:.0f}%"
+        self.lineas_probs = [f"{c} {p * 100:.0f}%" for c, p in probs.items()]
+        nueva = self.control_cnn.actualizar(probs)
         if nueva:
-            print(nueva)  # única salida por terminal: la señal detectada
+            self._avisar_senal(nueva)
+
+    def _avisar_senal(self, senal):
+        # única salida por terminal: la señal detectada y cómo queda el robot
+        estado = "DETENIDO" if self.control_cnn.detenido else "EN MARCHA"
+        print(f"{senal} -> {estado}, velocidad {self.control_cnn.velocidad}")
 
     def _dibujar_estado(self, salida, accion):
-        cv2.putText(salida, self.texto_cnn, (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.8,
+        if self.hilo_cnn:
+            self.texto_cnn = self.hilo_cnn.texto
+            self.lineas_probs = self.hilo_cnn.lineas_probs
+        cv2.putText(salida, self.texto_cnn, (10, 95), cv2.FONT_HERSHEY_SIMPLEX, 0.8,
                     (0, 0, 0), 4, cv2.LINE_AA)
-        cv2.putText(salida, self.texto_cnn, (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.8,
+        cv2.putText(salida, self.texto_cnn, (10, 95), cv2.FONT_HERSHEY_SIMPLEX, 0.8,
                     (255, 255, 0), 2, cv2.LINE_AA)
 
         # Probabilidad de cada clase (sirve para ver si SIGA/ZONA se acercan al umbral)
         for i, linea in enumerate(self.lineas_probs):
-            y_linea = 60 + i * 28
+            y_linea = 125 + i * 28
             cv2.putText(salida, linea, (10, y_linea), cv2.FONT_HERSHEY_SIMPLEX, 0.7,
                         (0, 0, 0), 4, cv2.LINE_AA)
             cv2.putText(salida, linea, (10, y_linea), cv2.FONT_HERSHEY_SIMPLEX, 0.7,
                         (255, 255, 255), 2, cv2.LINE_AA)
 
         detenido = self.control_cnn.detenido
-        texto = f"{'DETENIDO' if detenido else 'SIGUIENDO'} -> {accion}"
+        texto = (f"{'DETENIDO' if detenido else 'SIGUIENDO'} -> {accion}"
+                 f"  vel {self.control_cnn.velocidad}")
         y = salida.shape[0] - 20
         cv2.putText(salida, texto, (10, y), cv2.FONT_HERSHEY_SIMPLEX, 0.9,
                     (0, 0, 0), 5, cv2.LINE_AA)
         cv2.putText(salida, texto, (10, y), cv2.FONT_HERSHEY_SIMPLEX, 0.9,
                     self.COLOR_DETENIDO if detenido else self.COLOR_SIGUIENDO, 2, cv2.LINE_AA)
+
+        # Rendimiento: frames por segundo del seguidor y lo que tarda la CNN
+        ms_cnn = self.hilo_cnn.ms_por_prediccion if self.hilo_cnn else 0
+        texto = f"{self.fps:.0f} fps   CNN {ms_cnn:.0f} ms"
+        cv2.putText(salida, texto, (10, y - 40), cv2.FONT_HERSHEY_SIMPLEX, 0.7,
+                    (0, 0, 0), 4, cv2.LINE_AA)
+        cv2.putText(salida, texto, (10, y - 40), cv2.FONT_HERSHEY_SIMPLEX, 0.7,
+                    (255, 255, 255), 2, cv2.LINE_AA)
 
 
 if __name__ == "__main__":

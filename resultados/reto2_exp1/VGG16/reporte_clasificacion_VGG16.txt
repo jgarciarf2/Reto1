@@ -1,0 +1,16 @@
+Experimento: reto2_exp1
+Modelo: VGG16
+Épocas totales entrenadas: 37
+Mejor época seleccionada: 31
+============================================================
+
+              precision    recall  f1-score   support
+
+        PARE     0.8333    0.9091    0.8696        11
+        SIGA     0.5500    0.9167    0.6875        12
+VELOCIDAD_60     1.0000    0.4286    0.6000         7
+ZONA_ESCOLAR     0.9375    0.7143    0.8108        21
+
+    accuracy                         0.7647        51
+   macro avg     0.8302    0.7422    0.7420        51
+weighted avg     0.8324    0.7647    0.7655        51

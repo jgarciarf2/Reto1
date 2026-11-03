@@ -1,0 +1,16 @@
+Experimento: reto2_exp1
+Modelo: DenseNet121
+Épocas totales entrenadas: 40
+Mejor época seleccionada: 40
+============================================================
+
+              precision    recall  f1-score   support
+
+        PARE     0.9091    0.9091    0.9091        11
+        SIGA     0.5789    0.9167    0.7097        12
+VELOCIDAD_60     0.6667    0.8571    0.7500         7
+ZONA_ESCOLAR     1.0000    0.5714    0.7273        21
+
+    accuracy                         0.7647        51
+   macro avg     0.7887    0.8136    0.7740        51
+weighted avg     0.8356    0.7647    0.7655        51

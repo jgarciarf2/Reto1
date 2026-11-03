@@ -23,7 +23,8 @@ LETRAS = {
 
 # Dirección MAC de Bluetooth del mBot (dejar en None o vacío "" para modo pruebas/consola)
 # Cambia esta MAC por la de tu robot asignado en clase:
-MAC_BLUETOOTH = "00:1B:10:31:0A:AB"
+#MAC_BLUETOOTH = "00:1B:10:31:0A:AB"
+MAC_BLUETOOTH = "00:1B:10:21:2D:C0"
 PUERTO_BLUETOOTH = 1
 
 # Si se usa puerto serial USB en lugar de socket Bluetooth directo:
@@ -39,24 +40,55 @@ INTERVALO_REFRESCO_S = 0.3
 # ------------------------------------------------------------
 # RETO 2: señales por CNN
 # ------------------------------------------------------------
-# main.py usa el mejor modelo que indica resultados/seleccion.json (lo deja
-# entrenar.py). Los modelos están en resultados/<Modelo>/<Modelo>.keras.
+# main.py usa el mejor modelo que indica <carpeta>/seleccion.json (lo deja
+# entrenar.py). Se usa la primera carpeta de esta lista que tenga el modelo
+# (<carpeta>/<Modelo>/<Modelo>.keras): los .keras no se suben a git, así que
+# cada computador usa el que haya entrenado o copiado.
+CARPETAS_MODELO = ["resultados", "resultados/reto2_exp1"]
 
-# Cada cuántos segundos se envía "adelante" según la última señal vista:
-# más espaciado = el robot avanza más despacio.
-# SIGA es también la velocidad con la que arranca el robot antes de ver señales.
-INTERVALOS_ADELANTE = {
-    "SIGA": 0.4,
-    "ZONA_ESCOLAR": 1.0,
-    "VELOCIDAD_60": 0.15,
+# Velocidades de marcha. El robot arranca en NORMAL.
+#   ZONA_ESCOLAR  -> REDUCIDA
+#   VELOCIDAD_60  -> NORMAL (sube si iba reducida; si ya iba normal, la conserva)
+# `intervalo_s`: cada cuántos segundos se repite "adelante" (más espaciado =
+# más lento). `avance_s`: si no es None, en cada intervalo el robot avanza
+# esos segundos y luego se le manda "parar"; así frena aunque el mBot siga
+# de largo con un solo "adelante". Los giros no se tocan.
+VELOCIDADES = {
+    "NORMAL": {"intervalo_s": 0.2, "avance_s": None},
+    "REDUCIDA": {"intervalo_s": 1.0, "avance_s": 0.35},
 }
 
-# Giro del frame de la cámara en grados: 0, 90, -90 o 180. Con el iPhone sobre
-# el carro (video_test.MOV) -90 deja el robot abajo y la pista hacia arriba,
-# igual que las fotos de entrenamiento. La webcam del Mac iría en 0.
-# También se puede probar sin editar: python main.py 2 --rotar=90
-ROTACION_CAMARA = -90
+# Cada cuántos segundos se consulta la CNN (es la parte pesada del loop).
+INTERVALO_CNN_S = 0.2
 
-# Probabilidad mínima (0 a 1) para que la CNN cuente una señal. Más baja =
-# reconoce más fácil pero se equivoca más. Mira el % en pantalla para ajustarla.
-CONFIANZA_MINIMA = 0.85
+# Giro del frame de la cámara en grados: 0, 90, -90 o 180. Tiene que quedar el
+# robot abajo y la pista hacia arriba. Con DroidCam (celular sobre el carro)
+# es 90; con el iPhone por Cámara de continuidad (video_test.MOV) era -90.
+# También se puede probar sin editar: python main.py <camara> --rotar=-90
+ROTACION_CAMARA = 90
+
+# La rotación de arriba es para el seguidor de línea. La CNN reconoce mejor
+# con el frame tal como sale de la cámara (en el video de prueba: girado
+# -90 se pierden ZONA y SIGA). Pon False para pasarle el frame girado.
+CNN_SIN_ROTAR = True
+# Rellenar el frame hasta 3:4 / 4:3 antes de la CNN (como las fotos de
+# entrenamiento). En el video de prueba reconoce mejor sin relleno.
+CNN_RELLENO_3_4 = False
+
+# Probabilidad mínima (0 a 1, promediada) para que la CNN cuente una señal.
+# Más baja = reconoce más fácil pero se equivoca más. Mira el % en pantalla
+# para ajustarla (o prueba con --confianza=0.7, que vale para todas).
+# PARE y SIGA piden más: un PARE falso deja al robot quieto y un SIGA falso
+# lo saca de un PARE (con la pista vacía la CNN tiende a decir SIGA con
+# 40-80 %). ZONA y 60 solo cambian la velocidad, por eso van más bajos.
+CONFIANZA_MINIMA = {
+    "PARE": 0.90,
+    "SIGA": 0.90,
+    "ZONA_ESCOLAR": 0.60,
+    "VELOCIDAD_60": 0.75,
+    "SIN_SENAL": 0.60,
+}
+# Cuántas predicciones se promedian (suaviza frames sueltos con baja confianza).
+VENTANA_CNN = 2
+# Predicciones seguidas de la misma señal antes de obedecerla.
+CONFIRMACIONES_CNN = 3
