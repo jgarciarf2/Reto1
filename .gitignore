@@ -198,7 +198,7 @@ entrenamiento.log
 5_cnns/dataset/
 5_cnns/Copia de dataset/
 5_cnns/.venv/
-5_cnns/resultados/
+#5_cnns/resultados/
 5_cnns/__pycache__/
 
 # Videos de prueba (pesados)
