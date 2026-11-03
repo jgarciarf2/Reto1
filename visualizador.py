@@ -8,7 +8,7 @@ class Visualizador:
     para que un video vertical no se vea aplastado.
     """
 
-    def __init__(self, alto_panel=640):
+    def __init__(self, alto_panel=720):
         self.alto_panel = alto_panel
 
     def crear_panel(self, salida):

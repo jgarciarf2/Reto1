@@ -1,0 +1,16 @@
+Experimento: reto2_exp1
+Modelo: ResNet50
+Épocas totales entrenadas: 26
+Mejor época seleccionada: 20
+============================================================
+
+              precision    recall  f1-score   support
+
+        PARE     1.0000    1.0000    1.0000        11
+        SIGA     0.5714    1.0000    0.7273        12
+VELOCIDAD_60     1.0000    0.7143    0.8333         7
+ZONA_ESCOLAR     1.0000    0.6667    0.8000        21
+
+    accuracy                         0.8235        51
+   macro avg     0.8929    0.8452    0.8402        51
+weighted avg     0.8992    0.8235    0.8306        51

@@ -204,3 +204,6 @@ entrenamiento.log
 # Videos de prueba (pesados)
 *.MOV
 *.mov
+
+# Videos anotados de prueba (pesados)
+resultados/**/*.mp4

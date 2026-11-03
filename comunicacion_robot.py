@@ -86,8 +86,9 @@ class ComunicacionRobot:
         self.ultima_accion = None
         self.ultimo_tiempo_envio = 0
         self.intervalo = getattr(config_robot, "INTERVALO_REFRESCO_S", 0.3)
-        # Cada cuánto se repite ADELANTE; la CNN lo cambia según la señal.
-        self.intervalo_adelante = self.intervalo
+        # Velocidad de marcha (config_robot.VELOCIDADES); la CNN la cambia según la señal.
+        self.velocidad = "NORMAL"
+        self._ultimo_adelante = 0.0
 
     def _crear_salida(self):
         if getattr(config_robot, "MAC_BLUETOOTH", None):
@@ -101,13 +102,40 @@ class ComunicacionRobot:
 
     def enviar(self, accion):
         ahora = time.time()
+        if accion == Accion.ADELANTE:
+            accion = self._adelante_segun_velocidad(ahora)
+            if accion is None:
+                return
         # Enviar inmediatamente si cambió la acción, o periódicamente si sigue siendo la misma
-        intervalo = self.intervalo_adelante if accion == Accion.ADELANTE else self.intervalo
-        debe_enviar = (accion != self.ultima_accion) or ((ahora - self.ultimo_tiempo_envio) >= intervalo)
+        debe_enviar = (accion != self.ultima_accion) or ((ahora - self.ultimo_tiempo_envio) >= self.intervalo)
 
         if not debe_enviar:
             return
+        self._escribir(accion, ahora)
 
+    def _adelante_segun_velocidad(self, ahora):
+        """
+        Decide qué mandar cuando el seguidor pide ADELANTE, según la
+        velocidad (config_robot.VELOCIDADES):
+          - "adelante" cada `intervalo_s` (más espaciado = más lento);
+          - si `avance_s` no es None, pasado ese tiempo se manda "parar"
+            hasta el siguiente "adelante".
+        Devuelve la acción a enviar ya, o None si no hay que mandar nada.
+        """
+        perfil = config_robot.VELOCIDADES[self.velocidad]
+        desde_adelante = ahora - self._ultimo_adelante
+        if self.ultima_accion != Accion.ADELANTE and self.ultima_accion != Accion.PARAR:
+            desde_adelante = perfil["intervalo_s"]  # venía girando: avanza ya
+        if desde_adelante >= perfil["intervalo_s"]:
+            self._ultimo_adelante = ahora
+            self._escribir(Accion.ADELANTE, ahora)
+            return None
+        if perfil["avance_s"] and desde_adelante >= perfil["avance_s"] \
+                and self.ultima_accion == Accion.ADELANTE:
+            return Accion.PARAR
+        return None
+
+    def _escribir(self, accion, ahora):
         texto = self.letras[accion] + config_robot.TERMINADOR
         self.salida.escribir(texto, accion)
         self.ultima_accion = accion
