@@ -24,7 +24,7 @@ LETRAS = {
 # Dirección MAC de Bluetooth del mBot (dejar en None o vacío "" para modo pruebas/consola)
 # Cambia esta MAC por la de tu robot asignado en clase:
 #MAC_BLUETOOTH = "00:1B:10:31:0A:AB"
-MAC_BLUETOOTH = "00:1B:10:21:2D:C0"
+MAC_BLUETOOTH = "00:1B:10:21:2C:1B"
 PUERTO_BLUETOOTH = 1
 
 # Si se usa puerto serial USB en lugar de socket Bluetooth directo:
@@ -44,7 +44,11 @@ INTERVALO_REFRESCO_S = 0.3
 # entrenar.py). Se usa la primera carpeta de esta lista que tenga el modelo
 # (<carpeta>/<Modelo>/<Modelo>.keras): los .keras no se suben a git, así que
 # cada computador usa el que haya entrenado o copiado.
-CARPETAS_MODELO = ["resultados", "resultados/reto2_exp1"]
+CARPETAS_MODELO = ["resultados/reto2_exp3", "resultados/reto2_exp2", "resultados", "resultados/reto2_exp1"]
+# Modelo que usa el robot. None = el primero de seleccion.json (menor val_loss).
+# En reto2_exp2 ResNet50 gana por val_loss, pero MobileNet es mejor en test
+# (92.5 % vs 83 %) y responde en menos de la mitad del tiempo (93 vs 214 ms).
+MODELO_CNN = "MobileNet"
 
 # Velocidades de marcha. El robot arranca en NORMAL.
 #   ZONA_ESCOLAR  -> REDUCIDA
@@ -80,15 +84,19 @@ CNN_RELLENO_3_4 = False
 # para ajustarla (o prueba con --confianza=0.7, que vale para todas).
 # PARE y SIGA piden más: un PARE falso deja al robot quieto y un SIGA falso
 # lo saca de un PARE (con la pista vacía la CNN tiende a decir SIGA con
-# 40-80 %). ZONA y 60 solo cambian la velocidad, por eso van más bajos.
+# 40-85 %). ZONA y 60 solo cambian la velocidad, por eso van más bajos.
+# Ajustados para el MobileNet de reto2_exp3 con el video de prueba: SIGA
+# entre 0.84 y 0.88 nunca saca al robot de un PARE por error; con 0.90 ya
+# no reconoce el SIGA real del final.
 CONFIANZA_MINIMA = {
     "PARE": 0.90,
-    "SIGA": 0.90,
-    "ZONA_ESCOLAR": 0.60,
-    "VELOCIDAD_60": 0.75,
+    "SIGA": 0.88,
+    "ZONA_ESCOLAR": 0.50,
+    "VELOCIDAD_60": 0.60,
     "SIN_SENAL": 0.60,
 }
 # Cuántas predicciones se promedian (suaviza frames sueltos con baja confianza).
-VENTANA_CNN = 2
-# Predicciones seguidas de la misma señal antes de obedecerla.
-CONFIRMACIONES_CNN = 3
+VENTANA_CNN = 1
+# Predicciones seguidas de la misma señal antes de obedecerla (cada 0.2 s:
+# con 2 el robot reacciona en ~0.4 s).
+CONFIRMACIONES_CNN = 2

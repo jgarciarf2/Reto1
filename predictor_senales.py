@@ -20,6 +20,7 @@ class PredictorSenales:
     """
 
     def __init__(self, modelo=None, carpeta=None):
+        modelo = modelo or getattr(config_robot, "MODELO_CNN", None)
         carpeta, seleccion = buscar_modelo(modelo, carpeta)
         self.carpeta = carpeta
         self.nombre = modelo or seleccion["mejores"][0]["modelo"]
@@ -79,10 +80,14 @@ def buscar_modelo(modelo=None, carpeta=None):
     candidatas = [carpeta] if carpeta else config_robot.CARPETAS_MODELO
     for c in candidatas:
         ruta = os.path.join(c, "seleccion.json")
-        if not os.path.exists(ruta):
+        if os.path.exists(ruta):
+            with open(ruta, encoding="utf-8") as f:
+                seleccion = json.load(f)
+        elif modelo:
+            # Entrenamiento a medias: aún no hay seleccion.json, pero el modelo pedido sí
+            seleccion = {"img_size": list(IMG_SIZE)}
+        else:
             continue
-        with open(ruta, encoding="utf-8") as f:
-            seleccion = json.load(f)
         nombre = modelo or seleccion["mejores"][0]["modelo"]
         if os.path.exists(os.path.join(c, nombre, f"{nombre}.keras")):
             return c, seleccion

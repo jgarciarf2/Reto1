@@ -1,0 +1,27 @@
+{
+  "experimento": "reto2_exp3",
+  "clases": [
+    "PARE",
+    "SIGA",
+    "VELOCIDAD_60",
+    "ZONA_ESCOLAR"
+  ],
+  "img_size": [
+    224,
+    224
+  ],
+  "mejores": [
+    {
+      "modelo": "MobileNet",
+      "val_loss": 0.09162893891334534,
+      "accuracy": 0.9411764705882353,
+      "f1_macro": 0.9270526221745734
+    },
+    {
+      "modelo": "ResNet50",
+      "val_loss": 0.133547842502594,
+      "accuracy": 0.8431372549019608,
+      "f1_macro": 0.8646978021978022
+    }
+  ]
+}

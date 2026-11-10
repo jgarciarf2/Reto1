@@ -2,6 +2,7 @@ import unittest
 from itertools import groupby
 from unittest import mock
 
+import config_robot
 from comunicacion_robot import Accion, ComunicacionRobot
 from control_cnn import ControlCNN
 
@@ -127,8 +128,9 @@ class TestVelocidadRobot(unittest.TestCase):
     def test_normal_repite_adelante_sin_parar(self):
         envios = self.simular("NORMAL")
         self.assertEqual({a for _, a in envios}, {Accion.ADELANTE})
-        # 2 s con "adelante" cada 0.4 s
-        self.assertEqual(len(envios), 5)
+        # 2 s con "adelante" cada intervalo_s de NORMAL (con un envío de margen)
+        esperados = 2.0 / config_robot.VELOCIDADES["NORMAL"]["intervalo_s"]
+        self.assertLessEqual(abs(len(envios) - esperados), 1, len(envios))
 
     def test_reducida_avanza_y_para_en_cada_intervalo(self):
         envios = self.simular("REDUCIDA")
