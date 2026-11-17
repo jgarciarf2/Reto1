@@ -127,6 +127,35 @@ python -m unittest test_control_cnn
 
 **Cámara.** `ROTACION_CAMARA` gira el frame para el seguidor de línea (robot abajo, pista hacia arriba). La CNN recibe el frame **sin girar** (`CNN_SIN_ROTAR = True`). En el video de prueba, al girarlo -90° se pierden la ZONA ESCOLAR y el SIGA final, y el robot quedaría detenido para siempre.
 
+### Reconocimiento por recortes (modo principal)
+
+En las fotos de entrenamiento la señal ocupa una parte pequeña (el resto es el robot, la línea, la mano), y una CNN que mira todo eso puede aprender el contexto en vez de la señal. Por eso el robot **localiza, recorta y clasifica**:
+
+1. `localizador_color.py` busca manchas de color de señal (rojo: PARE y 60; verde: SIGA; amarillo: ZONA) y descarta las pilas del robot y lo que no tiene letras o pictograma. Hay una pasada permisiva para señales pálidas (el iPhone lava el amarillo de ZONA).
+2. Cada candidato (hasta `CNN_MAX_RECORTES`) se recorta cuadrado a 256x256 y la CNN lo clasifica en un solo lote.
+3. Si no hay ningún candidato, `CNN_RESPALDO_COMPLETO` clasifica el frame completo, pero solo acepta una señal con confianza >= `CNN_RESPALDO_MIN_PROB`.
+
+El modelo (`resultados_mixto/`) se entrena con recortes **y** fotos completas, así que acierta en cualquiera de los dos casos. El localizador no depende de la orientación de la cámara. En pantalla se dibuja el cuadro de lo que encontró.
+
+```bash
+python recortar_senales.py          # 5_cnns/dataset -> 5_cnns/dataset_senal (recortes + fotos completas + negativos)
+python entrenar.py MobileNet --dataset=5_cnns/dataset_senal --salida=resultados_mixto
+python evaluar_extremo.py           # localizar+recortar+clasificar sobre fotos de prueba que la red no vio
+python main.py 1 --prueba           # modo recortes (CNN_MODO en config_robot.py)
+python main.py 1 --prueba --modo=completo   # el método anterior, para comparar
+```
+
+`recortar_senales.py` lista en `_revisar.txt` las fotos donde no encontró la señal (tapada, cortada o que ni sale); no se usan para entrenar. `preparar_dataset.py` solo reduce las fotos completas a 256x256 (para el modo `--modo=completo` con un modelo entrenado sin recortes).
+
+Resultados del modelo mixto, con las particiones por grupos (una foto y sus variantes nunca se reparten entre entrenamiento y prueba):
+
+| Evaluación | Recortes | Foto completa |
+| ---------- | -------- | ------------- |
+| 178 imágenes de prueba (F1 macro) | 0.956 | |
+| 77 fotos originales no vistas, sistema completo | 77/77 | 70/77 |
+
+En `video_test.MOV` (sus fotogramas sí se usaron para entrenar, así que es optimista) acierta el 90 % de los instantes con el respaldo; sin recortes, el 67 %. Los fallos son PARE con la mano encima y señales cortadas por el borde. Sigue pendiente probarlo en la pista con un video nuevo.
+
 ### Comportamiento (`control_cnn.py`)
 
 | Señal | Qué hace el robot |

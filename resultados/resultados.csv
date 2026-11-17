@@ -1,3 +1,2 @@
 modelo,experimento,max_epochs,epoca_parada,mejor_epoca,train_loss,val_loss,accuracy,f1_ponderado,f1_macro,precision_macro,recall_macro,grafica_perdida,grafica_confusion,archivo_reporte
-MobileNet,reto2,30,30,30,0.20486712455749512,0.19192367792129517,0.9358974358974359,0.9420997936082174,0.9164337643115232,0.9166666666666666,0.9422058823529411,perdida_MobileNet.png,matriz_confusion_MobileNet.png,reporte_clasificacion_MobileNet.txt
-ResNet50,reto2,30,30,30,0.21578249335289001,0.13392764329910278,0.9487179487179487,0.9532435243508445,0.9314757375241246,0.9272727272727274,0.953970588235294,perdida_ResNet50.png,matriz_confusion_ResNet50.png,reporte_clasificacion_ResNet50.txt
+MobileNet,reto2,40,23,18,0.15319830179214478,0.20657099783420563,0.9069767441860465,0.9024705616691142,0.8913352711979714,0.8988888888888888,0.8930769230769231,perdida_MobileNet.png,matriz_confusion_MobileNet.png,reporte_clasificacion_MobileNet.txt

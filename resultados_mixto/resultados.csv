@@ -1,0 +1,2 @@
+modelo,experimento,max_epochs,epoca_parada,mejor_epoca,train_loss,val_loss,accuracy,f1_ponderado,f1_macro,precision_macro,recall_macro,grafica_perdida,grafica_confusion,archivo_reporte
+MobileNet,reto2,40,27,22,0.07669001072645187,0.1247926577925682,0.9550561797752809,0.9551158877490095,0.9555778520995913,0.9564502164502166,0.9562886996904025,perdida_MobileNet.png,matriz_confusion_MobileNet.png,reporte_clasificacion_MobileNet.txt

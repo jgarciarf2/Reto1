@@ -62,8 +62,9 @@ class AplicacionDetector:
     # La CNN es la parte pesada: se consulta cada INTERVALO_CNN_S, no en cada frame.
     INTERVALO_PREDICCION_S = config_robot.INTERVALO_CNN_S
 
-    def __init__(self, fuente_video="0", sin_robot=False, rotacion=None, confianza=None):
+    def __init__(self, fuente_video="0", sin_robot=False, rotacion=None, confianza=None, saltar=None, modo=None):
         self.fuente_video = fuente_video
+        self.saltar_frames = max(1, config_robot.SALTAR_FRAMES if saltar is None else saltar)
         grados = config_robot.ROTACION_CAMARA if rotacion is None else rotacion
         self.rotacion = self.ROTACIONES[grados]
         # Un número ("0", "1", ...) es el índice de la cámara física;
@@ -72,11 +73,11 @@ class AplicacionDetector:
         self.es_camara = isinstance(indice, int) or str(indice).startswith("http")
 
         try:
-            self.predictor = PredictorSenales()
+            self.predictor = PredictorSenales(modo=modo)
         except FileNotFoundError as e:
             raise SystemExit(str(e))
         print(f"CNN cargada: {self.predictor.nombre} ({self.predictor.carpeta}), "
-              f"clases {self.predictor.clases}")
+              f"clases {self.predictor.clases}, modo {self.predictor.modo}")
         self.control_cnn = ControlCNN(confianza_minima=confianza)
 
         # Primero el robot: conectarse por Bluetooth puede tardar
@@ -159,6 +160,10 @@ class AplicacionDetector:
             # CamaraEnVivo ya espera hasta ~5 s si la cámara tarda en arrancar
             return self.cap.read()
 
+        # Un video grabado a 60 fps no se alcanza a mostrar a tiempo real procesando
+        # cada frame: se descartan (grab, casi gratis) los que se saltan.
+        for _ in range(self.saltar_frames - 1):
+            self.cap.grab()
         ret, frame = self.cap.read()
         if ret:
             return ret, frame
@@ -205,6 +210,31 @@ class AplicacionDetector:
         estado = "DETENIDO" if self.control_cnn.detenido else "EN MARCHA"
         print(f"{senal} -> {estado}, velocidad {self.control_cnn.velocidad}")
 
+    def _caja_en_pantalla(self, caja, forma):
+        """Pasa una caja (x, y, w, h) del frame de la CNN al frame girado que se muestra."""
+        x, y, w, h = caja
+        alto, ancho = forma
+        if not config_robot.CNN_SIN_ROTAR or self.rotacion is None:
+            return caja  # la CNN vio el mismo frame que se muestra
+        if self.rotacion == cv2.ROTATE_90_CLOCKWISE:
+            return (alto - (y + h), x, h, w)
+        if self.rotacion == cv2.ROTATE_90_COUNTERCLOCKWISE:
+            return (y, ancho - (x + w), h, w)
+        return (ancho - (x + w), alto - (y + h), w, h)  # 180°
+
+    def _dibujar_cajas(self, salida):
+        """Cuadros de lo que el localizador propuso y lo que la CNN cree que es."""
+        if not self.hilo_cnn or self.hilo_cnn.forma_frame is None:
+            return
+        for caja, clase, prob in self.hilo_cnn.cajas:
+            x, y, w, h = (int(v) for v in self._caja_en_pantalla(caja, self.hilo_cnn.forma_frame))
+            color = (160, 160, 160) if clase == "SIN_SENAL" else (0, 255, 255)
+            cv2.rectangle(salida, (x, y), (x + w, y + h), color, 2)
+            cv2.putText(salida, f"{clase} {prob * 100:.0f}%", (x, max(y - 8, 14)),
+                        cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 0, 0), 4, cv2.LINE_AA)
+            cv2.putText(salida, f"{clase} {prob * 100:.0f}%", (x, max(y - 8, 14)),
+                        cv2.FONT_HERSHEY_SIMPLEX, 0.6, color, 2, cv2.LINE_AA)
+
     def _dibujar_estado(self, salida, accion):
         if self.hilo_cnn:
             self.texto_cnn = self.hilo_cnn.texto
@@ -221,6 +251,8 @@ class AplicacionDetector:
                         (0, 0, 0), 4, cv2.LINE_AA)
             cv2.putText(salida, linea, (10, y_linea), cv2.FONT_HERSHEY_SIMPLEX, 0.7,
                         (255, 255, 255), 2, cv2.LINE_AA)
+
+        self._dibujar_cajas(salida)
 
         detenido = self.control_cnn.detenido
         texto = (f"{'DETENIDO' if detenido else 'SIGUIENDO'} -> {accion}"
@@ -242,14 +274,17 @@ class AplicacionDetector:
 
 if __name__ == "__main__":
     import sys
-    # Uso: python main.py [fuente] [--prueba] [--rotar=90] [--confianza=0.6]
+    # Uso: python main.py [fuente] [--prueba] [--rotar=90] [--confianza=0.6] [--saltar=2] [--modo=recortes|completo]
     #   python main.py 0 --prueba            -> webcam 0, sin robot
     #   python main.py 2 --prueba --rotar=90 -> cámara 2 girada 90°, sin robot
+    #   python main.py video.MOV --saltar=2  -> video de 60 fps a tiempo real (procesa 1 de cada 2)
     #   python main.py 2                     -> cámara 2, conectado al robot
     argumentos = [a for a in sys.argv[1:] if not a.startswith("--")]
     sin_robot = "--prueba" in sys.argv
     ruta_video = argumentos[0] if argumentos else "0"
     rotacion = next((int(a.split("=")[1]) for a in sys.argv if a.startswith("--rotar=")), None)
     confianza = next((float(a.split("=")[1]) for a in sys.argv if a.startswith("--confianza=")), None)
-    AplicacionDetector(fuente_video=ruta_video, sin_robot=sin_robot,
-                       rotacion=rotacion, confianza=confianza).ejecutar()
+    saltar = next((int(a.split("=")[1]) for a in sys.argv if a.startswith("--saltar=")), None)
+    modo = next((a.split("=")[1] for a in sys.argv if a.startswith("--modo=")), None)
+    AplicacionDetector(fuente_video=ruta_video, sin_robot=sin_robot, rotacion=rotacion,
+                       confianza=confianza, saltar=saltar, modo=modo).ejecutar()

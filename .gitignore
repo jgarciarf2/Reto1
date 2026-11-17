@@ -207,3 +207,9 @@ entrenamiento.log
 
 # Videos anotados de prueba (pesados)
 resultados/**/*.mp4
+5_cnns/dataset_256/
+resultados/_anterior_224/
+5_cnns/dataset_senal/
+
+# Archivos temporales de Word
+~$*

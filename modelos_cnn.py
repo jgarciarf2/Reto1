@@ -16,5 +16,5 @@ MODELOS = {
 # señal. Con ella la red aprende a decir "no hay nada" y el robot se libera del PARE.
 CLASES = ["PARE", "SIGA", "VELOCIDAD_60", "ZONA_ESCOLAR", "SIN_SENAL"]
 
-# Resolución de entrada de las CNN (la de los apuntes de clase).
-IMG_SIZE = (224, 224)
+# Resolución de entrada de las CNN. preparar_dataset.py deja las fotos ya a este tamaño.
+IMG_SIZE = (256, 256)

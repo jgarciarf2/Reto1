@@ -6,6 +6,7 @@ import numpy as np
 import tensorflow as tf
 
 import config_robot
+from localizador_color import candidatos, recorte_cuadrado
 from modelos_cnn import CLASES, IMG_SIZE, MODELOS
 
 
@@ -15,11 +16,21 @@ class PredictorSenales:
     de una foto. Por defecto usa el mejor modelo de seleccion.json (el de
     menor val_loss); se puede forzar otro con `modelo="VGG16"`, etc.
 
+    Dos modos (config_robot.CNN_MODO, o `modo=`):
+      "recortes"  localiza la señal por color (localizador_color.py), recorta
+                  cada candidato y clasifica SOLO el recorte, así la red no ve
+                  el robot ni la pista. Si no hay ningún candidato y
+                  CNN_RESPALDO_COMPLETO es True, clasifica el frame completo
+                  (el modelo se entrena con las dos cosas).
+      "completo"  clasifica siempre el frame completo.
+
         predictor = PredictorSenales()
         clase, prob = predictor.predecir("foto.jpg")   # o un frame de OpenCV (BGR)
     """
 
-    def __init__(self, modelo=None, carpeta=None):
+    def __init__(self, modelo=None, carpeta=None, modo=None):
+        self.modo = modo or config_robot.CNN_MODO
+        self.ultimas_cajas = []  # [(caja, clase, prob)] de la última consulta, para dibujar
         carpeta, seleccion = buscar_modelo(modelo, carpeta)
         self.carpeta = carpeta
         self.nombre = modelo or seleccion["mejores"][0]["modelo"]
@@ -61,13 +72,52 @@ class PredictorSenales:
             foto = cv2.imread(foto, cv2.IMREAD_IGNORE_ORIENTATION | cv2.IMREAD_COLOR)
             if foto is None:
                 raise FileNotFoundError("No se pudo leer la imagen.")
+        if self.modo == "recortes":
+            return self._probabilidades_recortes(foto)
+        self.ultimas_cajas = []
+        return self._probabilidades_completa(foto)
+
+    def _predecir_lote(self, imagenes_bgr):
+        """Clasifica varias imágenes BGR ya a tamaño de entrada en UNA sola llamada."""
+        lote = np.stack([cv2.cvtColor(i, cv2.COLOR_BGR2RGB) for i in imagenes_bgr]).astype(np.float32)
+        return self.modelo(self._preprocesar(lote), training=False).numpy()
+
+    def _probabilidades_completa(self, foto):
         if config_robot.CNN_RELLENO_3_4:
             foto = self._a_proporcion(foto)
-        rgb = cv2.cvtColor(foto, cv2.COLOR_BGR2RGB)
-        rgb = cv2.resize(rgb, self.img_size[::-1]).astype(np.float32)
-        probs = self.modelo(self._preprocesar(rgb[None]), training=False).numpy()[0]
+        pequena = cv2.resize(foto, self.img_size[::-1], interpolation=cv2.INTER_AREA)
+        probs = self._predecir_lote([pequena])[0]
         self.ultimas_probs = probs  # todas las probabilidades, para depurar en pantalla
         return {c: float(p) for c, p in zip(self.clases, probs)}
+
+    def _probabilidades_recortes(self, frame):
+        # Igual que al armar el dataset: primero colores estrictos y, si no hay nada,
+        # la pasada permisiva (señales pálidas)
+        cands = (candidatos(frame) or candidatos(frame, relajado=True))[:config_robot.CNN_MAX_RECORTES]
+        self.ultimas_cajas = []
+        if not cands:
+            if config_robot.CNN_RESPALDO_COMPLETO:
+                probs = self._probabilidades_completa(frame)
+                # El frame completo se equivoca más (ve el robot y la pista): solo se
+                # acepta una señal si está MUY segura; si no, se da por vacía.
+                mejor = max((c for c in probs if c != "SIN_SENAL"), key=probs.get, default=None)
+                if mejor is None or probs[mejor] >= config_robot.CNN_RESPALDO_MIN_PROB:
+                    return probs
+            # Nada con color de señal a la vista: no hay señal
+            return {c: float(c == "SIN_SENAL") for c in self.clases}
+
+        recortes = [recorte_cuadrado(frame, c["caja"], lado_salida=self.img_size[0]) for c in cands]
+        probs = self._predecir_lote(recortes)
+        self.ultimas_probs = probs[0]
+        self.ultimas_cajas = [(c["caja"], self.clases[int(np.argmax(p))], float(np.max(p)))
+                              for c, p in zip(cands, probs)]
+
+        # Gana el candidato que más parece una señal (la probabilidad más alta
+        # sin contar SIN_SENAL); los demás suelen ser pilas del robot, etc.
+        es_senal = [i for i, c in enumerate(self.clases) if c != "SIN_SENAL"]
+        mejor = int(np.argmax(probs[:, es_senal].max(axis=1)))
+        self.ultimas_probs = probs[mejor]
+        return {c: float(p) for c, p in zip(self.clases, probs[mejor])}
 
 
 def buscar_modelo(modelo=None, carpeta=None):

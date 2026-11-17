@@ -44,7 +44,7 @@ INTERVALO_REFRESCO_S = 0.3
 # entrenar.py). Se usa la primera carpeta de esta lista que tenga el modelo
 # (<carpeta>/<Modelo>/<Modelo>.keras): los .keras no se suben a git, así que
 # cada computador usa el que haya entrenado o copiado.
-CARPETAS_MODELO = ["resultados", "resultados/reto2_exp1"]
+CARPETAS_MODELO = ["resultados_mixto", "resultados", "resultados/reto2_exp1"]
 
 # Velocidades de marcha. El robot arranca en NORMAL.
 #   ZONA_ESCOLAR  -> REDUCIDA
@@ -92,3 +92,24 @@ CONFIANZA_MINIMA = {
 VENTANA_CNN = 2
 # Predicciones seguidas de la misma señal antes de obedecerla.
 CONFIRMACIONES_CNN = 3
+
+# Saltar frames: se procesa 1 de cada N. Solo afecta a VIDEOS grabados (un video
+# de 60 fps no se ve a tiempo real procesando todos; con 2 sí). Con la cámara en
+# vivo no acelera nada: el seguidor tarda ~2 ms por frame y la CNN corre aparte
+# (~26 ms, cada INTERVALO_CNN_S), así que el robot ya va al ritmo de la cámara.
+# También se prueba sin editar: python main.py video.MOV --saltar=2
+SALTAR_FRAMES = 1
+
+# Cómo la CNN mira la imagen:
+#   "recortes": localiza la señal por color, la recorta y clasifica solo el recorte
+#               (el modelo de resultados_mixto se entrenó con recortes y fotos completas).
+#   "completo": clasifica siempre el frame completo (el método anterior).
+# También se prueba sin editar: python main.py 2 --modo=completo
+CNN_MODO = "recortes"
+# Cuántos candidatos (los de mayor área) se recortan y clasifican por consulta.
+CNN_MAX_RECORTES = 3
+# Si el localizador no encuentra nada (señal pálida o tapada), clasificar el frame
+# completo en vez de dar por hecho que no hay señal.
+CNN_RESPALDO_COMPLETO = True
+# Confianza mínima para aceptar una señal sacada del frame completo (respaldo).
+CNN_RESPALDO_MIN_PROB = 0.90

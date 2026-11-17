@@ -1,0 +1,22 @@
+{
+  "experimento": "reto2",
+  "clases": [
+    "0",
+    "1",
+    "2",
+    "3",
+    "4"
+  ],
+  "img_size": [
+    256,
+    256
+  ],
+  "mejores": [
+    {
+      "modelo": "MobileNet",
+      "val_loss": 0.1247926577925682,
+      "accuracy": 0.9550561797752809,
+      "f1_macro": 0.9555778520995913
+    }
+  ]
+}

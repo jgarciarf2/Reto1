@@ -1,6 +1,8 @@
 import csv
 import json
 import os
+import random
+import re
 
 import keras
 from keras import layers, models
@@ -14,7 +16,6 @@ from sklearn.metrics import (
     confusion_matrix,
     f1_score,
 )
-from sklearn.model_selection import train_test_split
 import tensorflow as tf
 
 from modelos_cnn import MODELOS
@@ -76,26 +77,82 @@ class CNNTrainer:
         self.class_names = class_names
         self.num_classes = len(self.class_names)
 
-        train_val_paths, test_paths, train_val_labels, test_labels = train_test_split(
-            file_paths,
-            labels,
-            test_size=self.test_split,
-            stratify=labels,
-            random_state=self.seed,
-        )
-
-        val_rel = self.val_split / (1.0 - self.test_split)
-        train_paths, val_paths, train_labels, val_labels = train_test_split(
-            train_val_paths,
-            train_val_labels,
-            test_size=val_rel,
-            stratify=train_val_labels,
-            random_state=self.seed,
-        )
+        train_paths, train_labels, val_paths, val_labels, test_paths, test_labels = \
+            self._particionar(file_paths, labels)
 
         self.train_raw = self._crear_dataset(train_paths, train_labels, entrenar=True)
         self.val_raw = self._crear_dataset(val_paths, val_labels)
         self.test_raw = self._crear_dataset(test_paths, test_labels)
+
+    @staticmethod
+    def _grupo(ruta):
+        """
+        Imágenes que se parecen demasiado para repartirlas entre entrenamiento y
+        prueba (si no, la prueba sale inflada): una foto y sus recortes
+        (NOMBRE_c1.jpg, NOMBRE_c2.jpg), los trozos de una misma foto (NOMBRE_n1.jpg) y los fotogramas de un mismo tramo de
+        video (video_<nombre>_<milisegundos>.jpg, en bloques de 3 s).
+        """
+        nombre = os.path.splitext(os.path.basename(ruta))[0]
+        nombre = re.sub(r"_[cnf]\d+$", "", nombre)  # _cN variantes, _nN trozos, _f1 foto completa
+        video = re.match(r"(.*video.*?)_(\d+)$", nombre, re.IGNORECASE)
+        if video:
+            return f"{video.group(1)}_{int(video.group(2)) // 3000}"
+        return nombre
+
+    @staticmethod
+    def _es_recorte(ruta):
+        return re.search(r"_c\d+$", os.path.splitext(os.path.basename(ruta))[0]) is not None
+
+    def _particionar(self, paths, labels):
+        """
+        Reparte train/val/test por GRUPOS dentro de cada clase. Los recortes
+        (_cN) solo se usan para entrenar: validación y prueba son siempre
+        fotos completas. Guarda el reparto en particiones.csv.
+        """
+        rng = random.Random(self.seed)
+        grupos = {}  # (clase, grupo) -> [rutas]
+        for ruta, clase in zip(paths, labels):
+            grupos.setdefault((clase, self._grupo(ruta)), []).append(ruta)
+
+        reparto = {}  # ruta -> partición
+        for clase in sorted(set(labels)):
+            claves = sorted(k for k in grupos if k[0] == clase)
+            rng.shuffle(claves)
+            originales = sum(1 for k in claves for r in grupos[k] if not self._es_recorte(r))
+            meta_test = originales * self.test_split
+            meta_val = originales * self.val_split
+            acumulado = 0
+            for k in claves:
+                n = sum(1 for r in grupos[k] if not self._es_recorte(r))
+                if acumulado < meta_test:
+                    particion = "test"
+                elif acumulado < meta_test + meta_val:
+                    particion = "val"
+                else:
+                    particion = "train"
+                acumulado += n
+                for r in grupos[k]:
+                    if particion != "train" and self._es_recorte(r):
+                        continue  # los recortes no se usan para validar ni probar
+                    reparto[r] = particion
+
+        salidas = {"train": ([], []), "val": ([], []), "test": ([], [])}
+        for ruta, clase in zip(paths, labels):
+            if ruta in reparto:
+                salidas[reparto[ruta]][0].append(ruta)
+                salidas[reparto[ruta]][1].append(clase)
+
+        ruta_csv = os.path.join(self.exp_dir, "particiones.csv")
+        with open(ruta_csv, "w", newline="", encoding="utf-8") as f:
+            w = csv.writer(f)
+            w.writerow(["particion", "clase", "grupo", "archivo"])
+            for ruta, clase in zip(paths, labels):
+                if ruta in reparto:
+                    w.writerow([reparto[ruta], self.class_names[clase], self._grupo(ruta), ruta])
+        for nombre, (rutas, _) in salidas.items():
+            print(f"  {nombre}: {len(rutas)} imágenes")
+
+        return (*salidas["train"], *salidas["val"], *salidas["test"])
 
     def _crear_dataset(self, paths, labels, entrenar=False):
         path_ds = tf.data.Dataset.from_tensor_slices((list(paths), list(labels)))

@@ -85,6 +85,8 @@ class HiloCNN:
         self.texto = "CNN..."
         self.lineas_probs = []
         self.ms_por_prediccion = 0.0
+        self.cajas = []          # [(caja, clase, prob)] de la última consulta
+        self.forma_frame = None  # (alto, ancho) del frame que vio la CNN
         self._frame = None
         self._lock = threading.Lock()
         self._activo = True
@@ -106,6 +108,8 @@ class HiloCNN:
                 clase = max(probs, key=probs.get)
                 self.texto = f"CNN: {clase} {probs[clase] * 100:.0f}%"
                 self.lineas_probs = [f"{c} {p * 100:.0f}%" for c, p in probs.items()]
+                self.cajas = list(getattr(self.predictor, "ultimas_cajas", []))
+                self.forma_frame = frame.shape[:2]
                 nueva = self.control.actualizar(probs)
                 if nueva and self.al_confirmar:
                     self.al_confirmar(nueva)
