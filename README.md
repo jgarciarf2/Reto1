@@ -123,7 +123,7 @@ python probar_videos.py          # prueba la CNN y el control sobre el video de 
 python -m unittest test_control_cnn
 ```
 
-**Modelo.** `main.py` usa la primera carpeta de `config_robot.CARPETAS_MODELO` que tenga `seleccion.json` y el `.keras` del mejor modelo. Los `.keras` no se suben a git: en cada computador hay que entrenar (`python entrenar.py`) o copiar la carpeta de resultados. El modelo puede tener 4 salidas o 5 (con `SIN_SENAL`); el predictor lo detecta solo.
+**Modelo.** `main.py` usa la primera carpeta de `config_robot.CARPETAS_MODELO` que tenga `seleccion.json` y el `.keras` del mejor modelo. Los `.keras` no se suben a git (`.gitignore`), con una excepción: `resultados_mixto/MobileNet/MobileNet.keras`, el modelo principal (13 MB), sí está en el repo para que cualquier computador pueda correr el robot con solo clonar. Para otros modelos hay que entrenar (`python entrenar.py`) o copiar la carpeta de resultados. El modelo puede tener 4 salidas o 5 (con `SIN_SENAL`); el predictor lo detecta solo.
 
 **Cámara.** `ROTACION_CAMARA` gira el frame para el seguidor de línea (robot abajo, pista hacia arriba). La CNN recibe el frame **sin girar** (`CNN_SIN_ROTAR = True`). En el video de prueba, al girarlo -90° se pierden la ZONA ESCOLAR y el SIGA final, y el robot quedaría detenido para siempre.
 

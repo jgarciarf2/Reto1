@@ -42,7 +42,7 @@ INTERVALO_REFRESCO_S = 0.3
 # ------------------------------------------------------------
 # main.py usa el mejor modelo que indica <carpeta>/seleccion.json (lo deja
 # entrenar.py). Se usa la primera carpeta de esta lista que tenga el modelo
-# (<carpeta>/<Modelo>/<Modelo>.keras): los .keras no se suben a git, así que
+# (<carpeta>/<Modelo>/<Modelo>.keras): los .keras no se suben a git (salvo el de resultados_mixto, el modelo principal), así que
 # cada computador usa el que haya entrenado o copiado.
 CARPETAS_MODELO = ["resultados_mixto", "resultados", "resultados/reto2_exp1"]
 
